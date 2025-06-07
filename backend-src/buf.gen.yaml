@@ -1,0 +1,36 @@
+version: v2
+plugins:
+  - remote: buf.build/community/neoeinstein-prost
+    out: gen/rust/src
+    opt:
+      - bytes=.
+      - compile_well_known_types
+      - extern_path=.google.protobuf=::pbjson_types
+      - file_descriptor_set
+  - remote: buf.build/community/neoeinstein-prost-serde
+    out: gen/rust/src
+  - remote: buf.build/community/neoeinstein-tonic
+    out: gen/rust/src
+    opt:
+      - compile_well_known_types
+      - extern_path=.google.protobuf=::pbjson_types
+  - local: protoc-gen-prost-crate
+    out: gen/rust
+    strategy: all
+    opt:
+      - gen_crate=Cargo.toml.tpl
+  - local: protoc-gen-swift
+    out: gen/swift/Sources
+    opt:
+      - Visibility=Public
+  - local: protoc-gen-grpc-swift-2
+    out: gen/swift/Sources
+    opt:
+      - Visibility=Public
+      - Client=True
+  - protoc_builtin: kotlin
+    out: gen/kotlin/src/main/kotlin/
+  - protoc_builtin: java
+    out: gen/kotlin/src/main/java/
+  - remote: buf.build/connectrpc/kotlin
+    out: gen/kotlin/src/main/kotlin/
