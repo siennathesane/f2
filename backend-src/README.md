@@ -19,12 +19,3 @@ popd
 ## Compiling for Kotlin Native
 
 Download and compile the `protoc` compiler plugins for Protobufs and gRPC.
-
-```shell
-wget https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-kotlin/1.4.3/protoc-gen-grpc-kotlin-1.4.3-jdk8.jar
-mv protoc-gen-grpc-kotlin-1.4.3-jdk8.jar ~/.bin/protoc-gen-grpc-kotlin.jar
-cat <<EOF > ~/.bin/protoc-gen-grpc-kotlin
-java -jar HOME/.bin/protoc-gen-grpc-kotlin.jar "$@"
-EOF
-chmod +x ~/.bin/protoc-gen-grpc-kotlin
-```

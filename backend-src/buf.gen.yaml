@@ -1,15 +1,15 @@
 version: v2
 plugins:
-  - remote: buf.build/community/neoeinstein-prost
+  - local: protoc-gen-prost
     out: gen/rust/src
     opt:
       - bytes=.
       - compile_well_known_types
       - extern_path=.google.protobuf=::pbjson_types
       - file_descriptor_set
-  - remote: buf.build/community/neoeinstein-prost-serde
+  - local: protoc-gen-prost-serde
     out: gen/rust/src
-  - remote: buf.build/community/neoeinstein-tonic
+  - local: protoc-gen-tonic
     out: gen/rust/src
     opt:
       - compile_well_known_types

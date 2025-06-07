@@ -1,0 +1,83 @@
+image: ubuntu/lts
+packages:
+  - binutils
+  - git
+  - gnupg2
+  - golang
+  - libc6-dev
+  - libcurl4-openssl-dev
+  - libedit2
+  - libgcc-13-dev
+  - libncurses-dev
+  - libpython3-dev
+  - libsqlite3-0
+  - libstdc++-13-dev
+  - libxml2-dev
+  - libz3-dev
+  - openjdk-21-jdk
+  - pkg-config
+  - protobuf-compiler
+  - rustup
+  - tzdata
+  - unzip
+  - zlib1g-dev
+sources:
+  - https://git.sr.ht/~siennathesane/f2
+secrets:
+  - ee4895d7-d338-48d4-b081-cfb814bd5246
+environment:
+  CARGO_TERM_COLOR: always
+  CARGO_INSTALL_ROOT: "/home/build/"
+  GOBIN: "/home/build/bin"
+  SWIFT_RELEASE: 6.1.2
+  SWIFTLY_HOME_DIR: "/home/build/.local/share/swiftly"
+  SWIFTLY_BIN_DIR: "/home/build/bin"
+tasks:
+  - setup: |
+      mkdir $HOME/bin
+      export PATH="$HOME/bin:$PATH"
+
+      # rust tools
+      rustup toolchain install nightly --profile default
+      cargo install cargo-llvm-cov \
+        protoc-gen-prost \
+        protoc-gen-prost-crate \
+        protoc-gen-prost-serde \
+        protoc-gen-tonic
+      curl -LsSf https://get.nexte.st/latest/linux | tar zxf - -C ~/bin/
+
+      # swift tools
+      curl -O https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz
+      tar zxf swiftly-$(uname -m).tar.gz
+      ./swiftly init --verbose --assume-yes --skip-install
+      . "${SWIFTLY_HOME_DIR}/env.sh"
+      swiftly install $SWIFT_RELEASE
+      swiftly use $SWIFT_RELEASE
+      hash -r
+
+      git clone https://github.com/apple/swift-protobuf
+      cd swift-protobuf
+      swift build -c release
+      cp .build/$(uname -m)-unknown-linux-gnu/release/protoc-gen-swift ~/bin/
+      cd ..
+      git clone https://github.com/grpc/grpc-swift-protobuf
+      cd grpc-swift-protobuf
+      swift build -c release --product protoc-gen-grpc-swift-2
+      cp .build/$(uname -m)-unknown-linux-gnu/release/protoc-gen-grpc-swift-2 ~/bin/
+      cd ..
+
+      # buf tools
+      go install github.com/bufbuild/buf/cmd/buf@v1.54.0
+  - generate-backend: |
+      export PATH="$HOME/bin:$PATH"
+      cd f2/backend-src
+      buf build
+      buf generate
+  - build-backend: |
+      export PATH="$HOME/bin:$PATH"
+      cd f2/backend-src
+      cargo build --release
+  - test: |
+      export PATH="$HOME/bin:$PATH"
+      cd f2/backend-src
+      cargo nextest run
