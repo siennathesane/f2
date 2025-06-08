@@ -8,4 +8,303 @@
 // For information on using the generated types, please see the documentation:
 //   https://github.com/grpc/grpc-swift
 
-// This file contained no services.
+import GRPCCore
+import GRPCProtobuf
+
+// MARK: - f2.users.v1.Users
+
+/// Namespace containing generated types for the "f2.users.v1.Users" service.
+@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+public enum F2_Users_V1_Users {
+    /// Service descriptor for the "f2.users.v1.Users" service.
+    public static let descriptor = GRPCCore.ServiceDescriptor(fullyQualifiedService: "f2.users.v1.Users")
+    /// Namespace for method metadata.
+    public enum Method {
+        /// Namespace for "CreateUser" metadata.
+        public enum CreateUser {
+            /// Request type for "CreateUser".
+            public typealias Input = F2_Users_V1_CreateUserRequest
+            /// Response type for "CreateUser".
+            public typealias Output = F2_Users_V1_CreateUserResponse
+            /// Descriptor for "CreateUser".
+            public static let descriptor = GRPCCore.MethodDescriptor(
+                service: GRPCCore.ServiceDescriptor(fullyQualifiedService: "f2.users.v1.Users"),
+                method: "CreateUser"
+            )
+        }
+        /// Descriptors for all methods in the "f2.users.v1.Users" service.
+        public static let descriptors: [GRPCCore.MethodDescriptor] = [
+            CreateUser.descriptor
+        ]
+    }
+}
+
+@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+extension GRPCCore.ServiceDescriptor {
+    /// Service descriptor for the "f2.users.v1.Users" service.
+    public static let f2_users_v1_Users = GRPCCore.ServiceDescriptor(fullyQualifiedService: "f2.users.v1.Users")
+}
+
+// MARK: f2.users.v1.Users (server)
+
+@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+extension F2_Users_V1_Users {
+    /// Streaming variant of the service protocol for the "f2.users.v1.Users" service.
+    ///
+    /// This protocol is the lowest-level of the service protocols generated for this service
+    /// giving you the most flexibility over the implementation of your service. This comes at
+    /// the cost of more verbose and less strict APIs. Each RPC requires you to implement it in
+    /// terms of a request stream and response stream. Where only a single request or response
+    /// message is expected, you are responsible for enforcing this invariant is maintained.
+    ///
+    /// Where possible, prefer using the stricter, less-verbose ``ServiceProtocol``
+    /// or ``SimpleServiceProtocol`` instead.
+    public protocol StreamingServiceProtocol: GRPCCore.RegistrableRPCService {
+        /// Handle the "CreateUser" method.
+        ///
+        /// - Parameters:
+        ///   - request: A streaming request of `F2_Users_V1_CreateUserRequest` messages.
+        ///   - context: Context providing information about the RPC.
+        /// - Throws: Any error which occurred during the processing of the request. Thrown errors
+        ///     of type `RPCError` are mapped to appropriate statuses. All other errors are converted
+        ///     to an internal error.
+        /// - Returns: A streaming response of `F2_Users_V1_CreateUserResponse` messages.
+        func createUser(
+            request: GRPCCore.StreamingServerRequest<F2_Users_V1_CreateUserRequest>,
+            context: GRPCCore.ServerContext
+        ) async throws -> GRPCCore.StreamingServerResponse<F2_Users_V1_CreateUserResponse>
+    }
+
+    /// Service protocol for the "f2.users.v1.Users" service.
+    ///
+    /// This protocol is higher level than ``StreamingServiceProtocol`` but lower level than
+    /// the ``SimpleServiceProtocol``, it provides access to request and response metadata and
+    /// trailing response metadata. If you don't need these then consider using
+    /// the ``SimpleServiceProtocol``. If you need fine grained control over your RPCs then
+    /// use ``StreamingServiceProtocol``.
+    public protocol ServiceProtocol: F2_Users_V1_Users.StreamingServiceProtocol {
+        /// Handle the "CreateUser" method.
+        ///
+        /// - Parameters:
+        ///   - request: A request containing a single `F2_Users_V1_CreateUserRequest` message.
+        ///   - context: Context providing information about the RPC.
+        /// - Throws: Any error which occurred during the processing of the request. Thrown errors
+        ///     of type `RPCError` are mapped to appropriate statuses. All other errors are converted
+        ///     to an internal error.
+        /// - Returns: A response containing a single `F2_Users_V1_CreateUserResponse` message.
+        func createUser(
+            request: GRPCCore.ServerRequest<F2_Users_V1_CreateUserRequest>,
+            context: GRPCCore.ServerContext
+        ) async throws -> GRPCCore.ServerResponse<F2_Users_V1_CreateUserResponse>
+    }
+
+    /// Simple service protocol for the "f2.users.v1.Users" service.
+    ///
+    /// This is the highest level protocol for the service. The API is the easiest to use but
+    /// doesn't provide access to request or response metadata. If you need access to these
+    /// then use ``ServiceProtocol`` instead.
+    public protocol SimpleServiceProtocol: F2_Users_V1_Users.ServiceProtocol {
+        /// Handle the "CreateUser" method.
+        ///
+        /// - Parameters:
+        ///   - request: A `F2_Users_V1_CreateUserRequest` message.
+        ///   - context: Context providing information about the RPC.
+        /// - Throws: Any error which occurred during the processing of the request. Thrown errors
+        ///     of type `RPCError` are mapped to appropriate statuses. All other errors are converted
+        ///     to an internal error.
+        /// - Returns: A `F2_Users_V1_CreateUserResponse` to respond with.
+        func createUser(
+            request: F2_Users_V1_CreateUserRequest,
+            context: GRPCCore.ServerContext
+        ) async throws -> F2_Users_V1_CreateUserResponse
+    }
+}
+
+// Default implementation of 'registerMethods(with:)'.
+@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+extension F2_Users_V1_Users.StreamingServiceProtocol {
+    public func registerMethods<Transport>(with router: inout GRPCCore.RPCRouter<Transport>) where Transport: GRPCCore.ServerTransport {
+        router.registerHandler(
+            forMethod: F2_Users_V1_Users.Method.CreateUser.descriptor,
+            deserializer: GRPCProtobuf.ProtobufDeserializer<F2_Users_V1_CreateUserRequest>(),
+            serializer: GRPCProtobuf.ProtobufSerializer<F2_Users_V1_CreateUserResponse>(),
+            handler: { request, context in
+                try await self.createUser(
+                    request: request,
+                    context: context
+                )
+            }
+        )
+    }
+}
+
+// Default implementation of streaming methods from 'StreamingServiceProtocol'.
+@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+extension F2_Users_V1_Users.ServiceProtocol {
+    public func createUser(
+        request: GRPCCore.StreamingServerRequest<F2_Users_V1_CreateUserRequest>,
+        context: GRPCCore.ServerContext
+    ) async throws -> GRPCCore.StreamingServerResponse<F2_Users_V1_CreateUserResponse> {
+        let response = try await self.createUser(
+            request: GRPCCore.ServerRequest(stream: request),
+            context: context
+        )
+        return GRPCCore.StreamingServerResponse(single: response)
+    }
+}
+
+// Default implementation of methods from 'ServiceProtocol'.
+@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+extension F2_Users_V1_Users.SimpleServiceProtocol {
+    public func createUser(
+        request: GRPCCore.ServerRequest<F2_Users_V1_CreateUserRequest>,
+        context: GRPCCore.ServerContext
+    ) async throws -> GRPCCore.ServerResponse<F2_Users_V1_CreateUserResponse> {
+        return GRPCCore.ServerResponse<F2_Users_V1_CreateUserResponse>(
+            message: try await self.createUser(
+                request: request.message,
+                context: context
+            ),
+            metadata: [:]
+        )
+    }
+}
+
+// MARK: f2.users.v1.Users (client)
+
+@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+extension F2_Users_V1_Users {
+    /// Generated client protocol for the "f2.users.v1.Users" service.
+    ///
+    /// You don't need to implement this protocol directly, use the generated
+    /// implementation, ``Client``.
+    public protocol ClientProtocol: Sendable {
+        /// Call the "CreateUser" method.
+        ///
+        /// - Parameters:
+        ///   - request: A request containing a single `F2_Users_V1_CreateUserRequest` message.
+        ///   - serializer: A serializer for `F2_Users_V1_CreateUserRequest` messages.
+        ///   - deserializer: A deserializer for `F2_Users_V1_CreateUserResponse` messages.
+        ///   - options: Options to apply to this RPC.
+        ///   - handleResponse: A closure which handles the response, the result of which is
+        ///       returned to the caller. Returning from the closure will cancel the RPC if it
+        ///       hasn't already finished.
+        /// - Returns: The result of `handleResponse`.
+        func createUser<Result>(
+            request: GRPCCore.ClientRequest<F2_Users_V1_CreateUserRequest>,
+            serializer: some GRPCCore.MessageSerializer<F2_Users_V1_CreateUserRequest>,
+            deserializer: some GRPCCore.MessageDeserializer<F2_Users_V1_CreateUserResponse>,
+            options: GRPCCore.CallOptions,
+            onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<F2_Users_V1_CreateUserResponse>) async throws -> Result
+        ) async throws -> Result where Result: Sendable
+    }
+
+    /// Generated client for the "f2.users.v1.Users" service.
+    ///
+    /// The ``Client`` provides an implementation of ``ClientProtocol`` which wraps
+    /// a `GRPCCore.GRPCCClient`. The underlying `GRPCClient` provides the long-lived
+    /// means of communication with the remote peer.
+    public struct Client<Transport>: ClientProtocol where Transport: GRPCCore.ClientTransport {
+        private let client: GRPCCore.GRPCClient<Transport>
+
+        /// Creates a new client wrapping the provided `GRPCCore.GRPCClient`.
+        ///
+        /// - Parameters:
+        ///   - client: A `GRPCCore.GRPCClient` providing a communication channel to the service.
+        public init(wrapping client: GRPCCore.GRPCClient<Transport>) {
+            self.client = client
+        }
+
+        /// Call the "CreateUser" method.
+        ///
+        /// - Parameters:
+        ///   - request: A request containing a single `F2_Users_V1_CreateUserRequest` message.
+        ///   - serializer: A serializer for `F2_Users_V1_CreateUserRequest` messages.
+        ///   - deserializer: A deserializer for `F2_Users_V1_CreateUserResponse` messages.
+        ///   - options: Options to apply to this RPC.
+        ///   - handleResponse: A closure which handles the response, the result of which is
+        ///       returned to the caller. Returning from the closure will cancel the RPC if it
+        ///       hasn't already finished.
+        /// - Returns: The result of `handleResponse`.
+        public func createUser<Result>(
+            request: GRPCCore.ClientRequest<F2_Users_V1_CreateUserRequest>,
+            serializer: some GRPCCore.MessageSerializer<F2_Users_V1_CreateUserRequest>,
+            deserializer: some GRPCCore.MessageDeserializer<F2_Users_V1_CreateUserResponse>,
+            options: GRPCCore.CallOptions = .defaults,
+            onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<F2_Users_V1_CreateUserResponse>) async throws -> Result = { response in
+                try response.message
+            }
+        ) async throws -> Result where Result: Sendable {
+            try await self.client.unary(
+                request: request,
+                descriptor: F2_Users_V1_Users.Method.CreateUser.descriptor,
+                serializer: serializer,
+                deserializer: deserializer,
+                options: options,
+                onResponse: handleResponse
+            )
+        }
+    }
+}
+
+// Helpers providing default arguments to 'ClientProtocol' methods.
+@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+extension F2_Users_V1_Users.ClientProtocol {
+    /// Call the "CreateUser" method.
+    ///
+    /// - Parameters:
+    ///   - request: A request containing a single `F2_Users_V1_CreateUserRequest` message.
+    ///   - options: Options to apply to this RPC.
+    ///   - handleResponse: A closure which handles the response, the result of which is
+    ///       returned to the caller. Returning from the closure will cancel the RPC if it
+    ///       hasn't already finished.
+    /// - Returns: The result of `handleResponse`.
+    public func createUser<Result>(
+        request: GRPCCore.ClientRequest<F2_Users_V1_CreateUserRequest>,
+        options: GRPCCore.CallOptions = .defaults,
+        onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<F2_Users_V1_CreateUserResponse>) async throws -> Result = { response in
+            try response.message
+        }
+    ) async throws -> Result where Result: Sendable {
+        try await self.createUser(
+            request: request,
+            serializer: GRPCProtobuf.ProtobufSerializer<F2_Users_V1_CreateUserRequest>(),
+            deserializer: GRPCProtobuf.ProtobufDeserializer<F2_Users_V1_CreateUserResponse>(),
+            options: options,
+            onResponse: handleResponse
+        )
+    }
+}
+
+// Helpers providing sugared APIs for 'ClientProtocol' methods.
+@available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+extension F2_Users_V1_Users.ClientProtocol {
+    /// Call the "CreateUser" method.
+    ///
+    /// - Parameters:
+    ///   - message: request message to send.
+    ///   - metadata: Additional metadata to send, defaults to empty.
+    ///   - options: Options to apply to this RPC, defaults to `.defaults`.
+    ///   - handleResponse: A closure which handles the response, the result of which is
+    ///       returned to the caller. Returning from the closure will cancel the RPC if it
+    ///       hasn't already finished.
+    /// - Returns: The result of `handleResponse`.
+    public func createUser<Result>(
+        _ message: F2_Users_V1_CreateUserRequest,
+        metadata: GRPCCore.Metadata = [:],
+        options: GRPCCore.CallOptions = .defaults,
+        onResponse handleResponse: @Sendable @escaping (GRPCCore.ClientResponse<F2_Users_V1_CreateUserResponse>) async throws -> Result = { response in
+            try response.message
+        }
+    ) async throws -> Result where Result: Sendable {
+        let request = GRPCCore.ClientRequest<F2_Users_V1_CreateUserRequest>(
+            message: message,
+            metadata: metadata
+        )
+        return try await self.createUser(
+            request: request,
+            options: options,
+            onResponse: handleResponse
+        )
+    }
+}

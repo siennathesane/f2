@@ -1,0 +1,95 @@
+# secret:
+#   auth:
+#     db:
+#       secretRef: supabase-auth-db
+#       secretRefKey:
+#         username: username
+#         password: password
+#   jwt:
+#     anonKey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzQ5MzM3MjAwLCJleHAiOjE5MDcxMDM2MDB9.2AQ0gHTLBTk1UlnyxSX30FShwURuJ0jCd1VR8cX6-Wk
+#     serviceKey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NDkzMzcyMDAsImV4cCI6MTkwNzEwMzYwMH0.KmD-pZEY3sBAKAa067qjPH1S51ciu26EvEpcer5zQrE
+#     secret: LkCkQDC5S2oyPs7IgqWi0dvDWAntDhdKRLx0es/COd5NJsPQWjrdepaJxx4jDT50oziIrOKjhCsizuJqhxseQQ==
+#   dashboard:
+#     username: supabase
+#     password: Supabase123!
+#   db:
+#     secretRef: supabase-auth-db
+#   analytics:
+#     apiKey: 6SC0CLaJQGjrAJOIZ4MdKNJmdcD+eGcnbKzNTvChc5YeNCyxp05kpUhOXtnhjxnWlS7BpzWeIUaqq4v2IerMOA==
+#   smtp:
+#     username: empty
+#     password: empty
+# auth:
+#   image:
+#     tag: "v2.175.0"
+#   environment:
+#     DB_HOST: postgres-dev-rw
+#     DB_NAME: supabaseauth
+#     GOTRUE_SITE_URL: http://dev.127.0.0.1.sslip.io
+#     GOTRUE_EXTERNAL_EMAIL_ENABLED: "false"
+#     GOTRUE_SMTP_HOST: "localhost"
+#     GOTRUE_SMTP_PORT: "1234"
+# analytics:
+#   environment:
+#     DB_USER: supabase
+#     DB_PASSWORD: Supabase123!
+#     DB_HOST: cockroachdb-public.cockroachdb.svc.cluster.local
+#     DB_PORT: 26257
+#     DB_SSL: require
+# db:
+#   enabled: false
+# functions:
+#   environment:
+#     DB_USER: supabase
+#     DB_PASSWORD: Supabase123!
+#     DB_HOST: cockroachdb-public.cockroachdb.svc.cluster.local
+#     DB_PORT: 26257
+#     DB_SSL: require
+# kong:
+#   ingress:
+#     className: traefik
+#     hosts:
+#       - host: api.127.0.0.1.sslip.io
+#         paths:
+#           - path: /
+#             pathType: Prefix
+# meta:
+#   environment:
+#     DB_HOST: cockroachdb-public.cockroachdb.svc.cluster.local
+#     DB_USER: supabase
+#     DB_PORT: 26257
+#     DB_DRIVER: postgres
+#     DB_SSL: require
+#     PG_META_PORT: "8080"
+# minio:
+#   enabled: true
+# storage:
+#   environment:
+#     # Set S3 endpoint if using external object-storage
+#     GLOBAL_S3_ENDPOINT: http://minio:9000
+#     STORAGE_BACKEND: s3
+#     GLOBAL_S3_PROTOCOL: http
+#     GLOBAL_S3_FORCE_PATH_STYLE: true
+#     AWS_DEFAULT_REGION: stub
+#     DB_USER: supabase
+#     DB_PORT: 26257
+#     DB_DRIVER: postgres
+#     DB_SSL: require # disable, allow, prefer, require, verify-ca, verify-full
+#     PGOPTIONS: -c search_path=storage,public
+# rest:
+#   environment:
+#     DB_USER: supabase
+#     DB_PASSWORD: Supabase123!
+#     DB_HOST: cockroachdb-public.cockroachdb.svc.cluster.local
+#     DB_SSL: require
+# realtime:
+#   environment:
+#     DB_USER: supabase
+#     DB_PASSWORD: Supabase123!
+#     DB_HOST: cockroachdb-public.cockroachdb.svc.cluster.local
+#     DB_PORT: 26257
+#     DB_SSL: require
+# studio:
+#   environment:
+#     SUPABASE_PUBLIC_URL: http://supa.127.0.0.1.sslip.io
+#     NEXT_ANALYTICS_BACKEND_PROVIDER: postgres

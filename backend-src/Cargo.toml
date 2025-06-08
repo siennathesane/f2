@@ -3,9 +3,10 @@ name = "f2"
 version = "0.1.0"
 edition = "2024"
 
-[workspace]
-members = [
-    "gen/rust",
-]
-
 [dependencies]
+tonic = "0.13.1"
+prost = "0.13.5"
+uuid = { version = "1.17.0", features = ["v4"] }
+
+[build-dependencies]
+tonic-build = "0.13.1"

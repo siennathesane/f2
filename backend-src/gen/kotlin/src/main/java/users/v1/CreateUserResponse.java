@@ -31,13 +31,13 @@ private static final long serialVersionUID = 0L;
 
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return users.v1.Users.internal_static_f2_users_v1_CreateUserResponse_descriptor;
+    return users.v1.UsersOuterClass.internal_static_f2_users_v1_CreateUserResponse_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return users.v1.Users.internal_static_f2_users_v1_CreateUserResponse_fieldAccessorTable
+    return users.v1.UsersOuterClass.internal_static_f2_users_v1_CreateUserResponse_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
             users.v1.CreateUserResponse.class, users.v1.CreateUserResponse.Builder.class);
   }
@@ -282,13 +282,13 @@ private static final long serialVersionUID = 0L;
       users.v1.CreateUserResponseOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return users.v1.Users.internal_static_f2_users_v1_CreateUserResponse_descriptor;
+      return users.v1.UsersOuterClass.internal_static_f2_users_v1_CreateUserResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return users.v1.Users.internal_static_f2_users_v1_CreateUserResponse_fieldAccessorTable
+      return users.v1.UsersOuterClass.internal_static_f2_users_v1_CreateUserResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               users.v1.CreateUserResponse.class, users.v1.CreateUserResponse.Builder.class);
     }
@@ -330,7 +330,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return users.v1.Users.internal_static_f2_users_v1_CreateUserResponse_descriptor;
+      return users.v1.UsersOuterClass.internal_static_f2_users_v1_CreateUserResponse_descriptor;
     }
 
     @java.lang.Override

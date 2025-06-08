@@ -5,8 +5,8 @@
 
 package users.v1;
 
-public final class Users {
-  private Users() {}
+public final class UsersOuterClass {
+  private UsersOuterClass() {}
   static {
     com.google.protobuf.RuntimeVersion.validateProtobufGencodeVersion(
       com.google.protobuf.RuntimeVersion.RuntimeDomain.PUBLIC,
@@ -14,7 +14,7 @@ public final class Users {
       /* minor= */ 29,
       /* patch= */ 3,
       /* suffix= */ "",
-      Users.class.getName());
+      UsersOuterClass.class.getName());
   }
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistryLite registry) {
@@ -56,10 +56,10 @@ public final class Users {
       "\030\001 \001(\0132\021.f2.users.v1.UserR\004user\"f\n\022Creat" +
       "eUserResponse\022%\n\004user\030\001 \001(\0132\021.f2.users.v" +
       "1.UserR\004user\022)\n\005error\030\002 \001(\0132\023.f2.errors." +
-      "v1.ErrorR\005error2]\n\014UsersService\022M\n\nCreat" +
-      "eUser\022\036.f2.users.v1.CreateUserRequest\032\037." +
-      "f2.users.v1.CreateUserResponseB\014\n\010users." +
-      "v1P\001b\006proto3"
+      "v1.ErrorR\005error2V\n\005Users\022M\n\nCreateUser\022\036" +
+      ".f2.users.v1.CreateUserRequest\032\037.f2.user" +
+      "s.v1.CreateUserResponseB\014\n\010users.v1P\001b\006p" +
+      "roto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
