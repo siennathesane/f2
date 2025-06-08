@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose -f supabase.yaml convert
+    kompose.version: 1.36.0 (HEAD)
+  labels:
+    io.kompose.service: analytics
+  name: analytics
+spec:
+  ports:
+    - name: "4000"
+      port: 4000
+      targetPort: 4000
+  selector:
+    io.kompose.service: analytics

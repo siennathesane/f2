@@ -24,7 +24,16 @@ resource "kubernetes_manifest" "f2-cluster" {
           "passwordSecret" = {
             "name" = kubernetes_secret_v1.f2-auth-db.metadata[0].name
           }
-        }]
+        },
+        {
+          "name" = kubernetes_secret_v1.f2-analytics-db.data.username
+          "login" = true
+          "superuser" = true
+          "passwordSecret" = {
+            "name" = kubernetes_secret_v1.f2-analytics-db.metadata[0].name
+          }
+        }
+        ]
       }
       "instances" = 3
       "storage" = {

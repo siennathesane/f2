@@ -59,7 +59,7 @@ resource "kubernetes_secret_v1" "f2-auth-db" {
   }
 
   data = {
-    username = "f2auth"
+    username = "auth"
     password = random_password.f2-auth-db-password.result
     database = "auth"
   }
@@ -95,9 +95,9 @@ resource "kubernetes_deployment_v1" "f2-auth" {
   }
 
   metadata {
-    name = "f2auth"
+    name = "f2-auth"
     labels = {
-      "f2.pub/app" = "auth-${var.environment}"
+      "f2.pub/app" = "f2-auth-${var.environment}"
     }
     namespace = var.namespace
   }
@@ -107,14 +107,14 @@ resource "kubernetes_deployment_v1" "f2-auth" {
 
     selector {
       match_labels = {
-        "f2.pub/app" = "auth-${var.environment}"
+        "f2.pub/app" = "f2-auth-${var.environment}"
       }
     }
 
     template {
       metadata {
         labels = {
-          "f2.pub/app" = "auth-${var.environment}"
+          "f2.pub/app" = "f2-auth-${var.environment}"
         }
       }
 
