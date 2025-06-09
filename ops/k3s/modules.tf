@@ -3,7 +3,7 @@ module "cnpg" {
 }
 
 module "f2" {
-  source                = "./modules/f2"
+  source                = "./modules/f2-infra"
   environment           = var.environment
   ghcr-pull-secret-name = module.bootstrap.ghcr-pull-secret-name
   namespace             = module.bootstrap.f2-namespace

@@ -1,0 +1,11 @@
+name = "f2"
+compatibility_date = "2025-04-01"
+
+[assets]
+directory = "./dist"
+
+[env.gamma]
+name = "f2-frontend-gamma"
+
+[env.prod]
+name = "f2-frontend-prod"
