@@ -1,28 +1,5 @@
 locals {
-  f2-realtime-db-namespace = "_realtime"
-}
-
-resource "kubernetes_manifest" "f2-realtime-db" {
-  manifest = {
-    "apiVersion" = "postgresql.cnpg.io/v1"
-    "kind"       = "Database"
-    "metadata" = {
-      "name"      = "f2-realtime-db"
-      "namespace" = var.namespace
-    }
-    "spec" = {
-      "cluster" = {
-        "name" = kubernetes_manifest.f2-cluster.object.metadata.name
-      }
-      "allowConnections" = true
-      "name"             = local.f2-realtime-db-namespace
-      "owner"            = kubernetes_secret_v1.f2-realtime-db.data.username
-      "schemas" = [{
-        "name"  = local.f2-realtime-db-namespace
-        "owner" = kubernetes_secret_v1.f2-realtime-db.data.username
-      }]
-    }
-  }
+  f2-realtime-db-namespace = "realtime"
 }
 
 resource "kubernetes_secret_v1" "f2-realtime-db" {
@@ -57,7 +34,7 @@ resource "kubernetes_secret_v1" "f2-realtime-config" {
   data = {
     db_hostname          = "${kubernetes_manifest.f2-cluster.object.metadata.name}-rw.${var.environment}.svc.cluster.local"
     db_encryption_key    = "jbZ/1S2hIN7C6iM5"
-    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-realtime-db.data.username}:${kubernetes_secret_v1.f2-realtime-db.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${kubernetes_secret_v1.f2-realtime-db.data.database}"
+    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-realtime-db.data.username}:${kubernetes_secret_v1.f2-realtime-db.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${local.f2-control-plane-db-name}"
     slot_name            = "f2-realtime-${var.environment}"
     api_jwt_secret       = "a68866aa-92fa-4829-b475-31ec8f6e4da5"
   }
@@ -67,7 +44,7 @@ resource "kubernetes_secret_v1" "f2-realtime-config" {
 
 resource "kubernetes_deployment" "f2-realtime" {
   metadata {
-    name      = "f2-realtime"
+    name      = "f2-realtime-${var.environment}"
     namespace = var.namespace
     labels = {
       "f2.pub/app" = "f2-realtime-${var.environment}"
@@ -84,14 +61,14 @@ resource "kubernetes_deployment" "f2-realtime" {
 
     selector {
       match_labels = {
-        "f2.pub/app" = "f2-analytics-${var.environment}"
+        "f2.pub/app" = "f2-realtime-${var.environment}"
       }
     }
 
     template {
       metadata {
         labels = {
-          "f2.pub/app" = "f2-analytics-${var.environment}"
+          "f2.pub/app" = "f2-realtime-${var.environment}"
         }
       }
 
@@ -99,10 +76,6 @@ resource "kubernetes_deployment" "f2-realtime" {
         container {
           name  = "f2-realtime"
           image = "supabase/realtime:v2.34.47"
-
-          env {
-            name = "API_JWT_SECRET"
-          }
 
           env {
             name  = "APP_NAME"
@@ -246,6 +219,25 @@ resource "kubernetes_deployment" "f2-realtime" {
 
         restart_policy = "Always"
       }
+    }
+  }
+}
+
+resource "kubernetes_service" "f2-realtime" {
+  metadata {
+    name      = "f2-realtime-${var.environment}"
+    namespace = var.namespace
+  }
+
+  spec {
+    selector = {
+      app = "f2-realtime-${var.environment}"
+    }
+
+    port {
+      name        = "http"
+      port        = 4000
+      target_port = 4000
     }
   }
 }

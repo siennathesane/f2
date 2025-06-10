@@ -2,29 +2,6 @@ locals {
   f2-analytics-db-namespace = "_analytics"
 }
 
-resource "kubernetes_manifest" "f2-analytics-db" {
-  manifest = {
-    "apiVersion" = "postgresql.cnpg.io/v1"
-    "kind"       = "Database"
-    "metadata" = {
-      "name"      = "f2-analytics-db"
-      "namespace" = var.namespace
-    }
-    "spec" = {
-      "cluster" = {
-        "name" = kubernetes_manifest.f2-cluster.object.metadata.name
-      }
-      "allowConnections" = true
-      "name"             = local.f2-analytics-db-namespace
-      "owner"            = kubernetes_secret_v1.f2-analytics-db.data.username
-      "schemas" = [{
-        "name"  = local.f2-analytics-db-namespace
-        "owner" = kubernetes_secret_v1.f2-analytics-db.data.username
-      }]
-    }
-  }
-}
-
 resource "kubernetes_secret_v1" "f2-analytics-db" {
   metadata {
     name      = "f2-analytics-db"
@@ -37,7 +14,6 @@ resource "kubernetes_secret_v1" "f2-analytics-db" {
   data = {
     username = "f2analytics"
     password = random_password.f2-analytics-db-password.result
-    database = "_analytics"
   }
 
   type = "Opaque"
@@ -55,12 +31,12 @@ resource "kubernetes_secret_v1" "f2-analytics-config" {
   }
 
   data = {
-    db_database          = kubernetes_secret_v1.f2-analytics-db.data.database
+    db_database          = local.f2-control-plane-db-name
     db_hostname          = "${kubernetes_manifest.f2-cluster.object.metadata.name}-rw"
     db_password          = kubernetes_secret_v1.f2-analytics-db.data.password
     db_encryption_key    = "rv9KN3oPYQjiI8U0w1JaeZaCvILZ0l1AEALj24qa9tFdCyQF6VD2lYDIEmoiNd/JBJQlXv4+Up39S0A8qiqTyQ=="
     api_key              = "JvmiXX7ZBep512JW20VFI2+32PxU4QImMP3HOjG+1VM9akNHUhFEuq+6PQcXg3OWn2Y4+gvXqve0f8i/tlikLg=="
-    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-analytics-db.data.username}:${kubernetes_secret_v1.f2-analytics-db.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${kubernetes_secret_v1.f2-analytics-db.data.database}"
+    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-analytics-db.data.username}:${kubernetes_secret_v1.f2-analytics-db.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${local.f2-control-plane-db-name}"
   }
 
   type = "Opaque"

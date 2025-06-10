@@ -4,54 +4,31 @@ locals {
 
 resource "kubernetes_service_account" "f2-auth" {
   metadata {
-    name      = "f2-auth"
+    name      = "f2-auth-${var.environment}"
     namespace = var.namespace
-  }
-}
-
-resource "kubernetes_manifest" "f2-auth-db" {
-  manifest = {
-    "apiVersion" = "postgresql.cnpg.io/v1"
-    "kind"       = "Database"
-    "metadata" = {
-      "name"      = "f2-auth-db"
-      "namespace" = var.namespace
-    }
-    "spec" = {
-      "cluster" = {
-        "name" = kubernetes_manifest.f2-cluster.object.metadata.name
-      }
-      "allowConnections" = true
-      "name"             = local.f2-auth-db-namespace
-      "owner"            = kubernetes_secret_v1.f2-auth-db.data.username
-      "schemas" = [{
-        "name"  = local.f2-auth-db-namespace
-        "owner" = kubernetes_secret_v1.f2-auth-db.data.username
-      }]
-    }
   }
 }
 
 resource "kubernetes_config_map_v1" "f2-auth-initdb" {
   metadata {
-    name      = "sql-commands"
+    name      = "f2-auth-initdb-sql-commands-${var.environment}"
     namespace = var.namespace
   }
 
   data = {
     "script.sql" = <<-EOT
-    ALTER USER ${kubernetes_secret_v1.f2-auth-db.data.username} WITH LOGIN CREATEROLE CREATEDB REPLICATION BYPASSRLS;
-    GRANT ${kubernetes_secret_v1.f2-auth-db.data.username} TO postgres;
-    CREATE SCHEMA IF NOT EXISTS ${local.f2-auth-db-namespace} AUTHORIZATION ${kubernetes_secret_v1.f2-auth-db.data.username};
-    GRANT CREATE ON DATABASE postgres TO ${kubernetes_secret_v1.f2-auth-db.data.username};
-    ALTER USER ${kubernetes_secret_v1.f2-auth-db.data.username} SET search_path = '${local.f2-auth-db-namespace}';
+    ALTER USER ${kubernetes_secret_v1.f2-auth-config.data.username} WITH LOGIN CREATEROLE CREATEDB REPLICATION BYPASSRLS;
+    GRANT ${kubernetes_secret_v1.f2-auth-config.data.username} TO postgres;
+    CREATE SCHEMA IF NOT EXISTS ${local.f2-auth-db-namespace} AUTHORIZATION ${kubernetes_secret_v1.f2-auth-config.data.username};
+    GRANT CREATE ON DATABASE postgres TO ${kubernetes_secret_v1.f2-auth-config.data.username};
+    ALTER USER ${kubernetes_secret_v1.f2-auth-config.data.username} SET search_path = '${local.f2-auth-db-namespace}';
     EOT
   }
 }
 
-resource "kubernetes_secret_v1" "f2-auth-db" {
+resource "kubernetes_secret_v1" "f2-auth-config" {
   metadata {
-    name      = "auth-db"
+    name      = "f2-auth-db-${var.environment}"
     namespace = var.namespace
     labels = {
       "cnpg.io/reload" = "true"
@@ -59,12 +36,23 @@ resource "kubernetes_secret_v1" "f2-auth-db" {
   }
 
   data = {
-    username = "auth"
+    username = "f2auth"
     password = random_password.f2-auth-db-password.result
-    database = "auth"
   }
 
   type = "kubernetes.io/basic-auth"
+}
+
+# to prevent cyles
+resource "kubernetes_secret_v1" "f2-auth-db-uri" {
+  metadata {
+    name      = "f2-auth-db-uri-${var.environment}"
+    namespace = var.namespace
+  }
+
+  data = {
+    db_uri = "postgres://${kubernetes_secret_v1.f2-auth-config.data.username}:${kubernetes_secret_v1.f2-auth-config.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${local.f2-control-plane-db-name}"
+  }
 }
 
 resource "random_password" "f2-auth-db-password" {
@@ -73,15 +61,13 @@ resource "random_password" "f2-auth-db-password" {
 }
 
 resource "kubernetes_deployment_v1" "f2-auth" {
-  depends_on = [kubernetes_manifest.f2-auth-db]
-
   timeouts {
     create = "2m"
     update = "2m"
   }
 
   metadata {
-    name = "f2-auth"
+    name = "f2-auth-${var.environment}"
     labels = {
       "f2.pub/app" = "f2-auth-${var.environment}"
     }
@@ -124,17 +110,27 @@ resource "kubernetes_deployment_v1" "f2-auth" {
 
           env {
             name  = "PGDATABASE"
-            value = kubernetes_secret_v1.f2-auth-db.data.database
+            value = local.f2-control-plane-db-name
           }
 
           env {
-            name  = "PGUSER"
-            value = kubernetes_secret_v1.f2-auth-db.data.username
+            name = "PGUSER"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.f2-db-admin.metadata[0].name
+                key  = "username"
+              }
+            }
           }
 
           env {
-            name  = "PGPASSWORD"
-            value = kubernetes_secret_v1.f2-auth-db.data.password
+            name = "PGPASSWORD"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.f2-db-admin.metadata[0].name
+                key  = "password"
+              }
+            }
           }
 
           volume_mount {
@@ -179,17 +175,22 @@ resource "kubernetes_deployment_v1" "f2-auth" {
           }
           env {
             name  = "DB_NAMESPACE"
-            value = "auth"
+            value = local.f2-auth-db-namespace
           }
           env {
-            name  = "DATABASE_URL"
-            value = "postgres://${kubernetes_secret_v1.f2-auth-db.data.username}:${kubernetes_secret_v1.f2-auth-db.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${kubernetes_secret_v1.f2-auth-db.data.database}"
+            name = "DATABASE_URL"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.f2-auth-db-uri.metadata[0].name
+                key  = "db_uri"
+              }
+            }
           }
           env {
             name = "GOTRUE_JWT_SECRET"
             value_from {
               secret_key_ref {
-                name = "auth-jwt"
+                name = kubernetes_secret_v1.f2-auth-jwt.metadata[0].name
                 key  = "secret"
               }
             }
@@ -230,9 +231,11 @@ resource "kubernetes_deployment_v1" "f2-auth" {
     }
   }
 }
+
 resource "kubernetes_service_v1" "f2-auth-svc" {
   metadata {
-    name = "f2-auth-svc"
+    name      = "f2-auth-svc-${var.environment}"
+    namespace = var.namespace
     labels = {
       "f2.pub/app" = "f2-auth-${var.environment}"
     }
@@ -243,7 +246,7 @@ resource "kubernetes_service_v1" "f2-auth-svc" {
       name        = "http"
       protocol    = "TCP"
       port        = 9999
-      target_port = "9999"
+      target_port = 9999
     }
 
     selector = {
