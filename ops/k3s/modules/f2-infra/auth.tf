@@ -19,7 +19,7 @@ resource "kubernetes_manifest" "f2-auth-db" {
     }
     "spec" = {
       "cluster" = {
-        "name" =  kubernetes_manifest.f2-cluster.object.metadata.name
+        "name" = kubernetes_manifest.f2-cluster.object.metadata.name
       }
       "allowConnections" = true
       "name"             = local.f2-auth-db-namespace
@@ -67,24 +67,9 @@ resource "kubernetes_secret_v1" "f2-auth-db" {
   type = "kubernetes.io/basic-auth"
 }
 
-resource "kubernetes_secret_v1" "f2-auth-jwt" {
-  metadata {
-    name      = "auth-jwt"
-    namespace = var.namespace
-  }
-
-  data = {
-    anonKey    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzQ5MzM3MjAwLCJleHAiOjE5MDcxMDM2MDB9.2AQ0gHTLBTk1UlnyxSX30FShwURuJ0jCd1VR8cX6-Wk"
-    secret     = "LkCkQDC5S2oyPs7IgqWi0dvDWAntDhdKRLx0es/COd5NJsPQWjrdepaJxx4jDT50oziIrOKjhCsizuJqhxseQQ=="
-    serviceKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3NDkzMzcyMDAsImV4cCI6MTkwNzEwMzYwMH0.KmD-pZEY3sBAKAa067qjPH1S51ciu26EvEpcer5zQrE"
-  }
-
-  type = "Opaque"
-}
-
 resource "random_password" "f2-auth-db-password" {
-  length           = 16
-  special          = false
+  length  = 16
+  special = false
 }
 
 resource "kubernetes_deployment_v1" "f2-auth" {
@@ -92,6 +77,7 @@ resource "kubernetes_deployment_v1" "f2-auth" {
 
   timeouts {
     create = "2m"
+    update = "2m"
   }
 
   metadata {
@@ -166,9 +152,9 @@ resource "kubernetes_deployment_v1" "f2-auth" {
         }
 
         container {
-          image = "ghcr.io/siennathesane/auth:${var.goauth-version}"
+          image             = "ghcr.io/siennathesane/auth:${var.goauth-version}"
           image_pull_policy = "Always"
-          name  = "auth"
+          name              = "auth"
 
           resources {
             limits = {
@@ -197,7 +183,7 @@ resource "kubernetes_deployment_v1" "f2-auth" {
           }
           env {
             name  = "DATABASE_URL"
-            value = "postgres://${kubernetes_secret_v1.f2-auth-db.data.username}:${kubernetes_secret_v1.f2-auth-db.data.password}@${ kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${kubernetes_secret_v1.f2-auth-db.data.database}"
+            value = "postgres://${kubernetes_secret_v1.f2-auth-db.data.username}:${kubernetes_secret_v1.f2-auth-db.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${kubernetes_secret_v1.f2-auth-db.data.database}"
           }
           env {
             name = "GOTRUE_JWT_SECRET"

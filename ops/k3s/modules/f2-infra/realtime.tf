@@ -12,7 +12,7 @@ resource "kubernetes_manifest" "f2-realtime-db" {
     }
     "spec" = {
       "cluster" = {
-        "name" =  kubernetes_manifest.f2-cluster.object.metadata.name
+        "name" = kubernetes_manifest.f2-cluster.object.metadata.name
       }
       "allowConnections" = true
       "name"             = local.f2-realtime-db-namespace
@@ -44,20 +44,22 @@ resource "kubernetes_secret_v1" "f2-realtime-db" {
 }
 
 resource "random_password" "f2-realtime-db-password" {
-  length           = 16
-  special          = false
+  length  = 16
+  special = false
 }
 
 resource "kubernetes_secret_v1" "f2-realtime-config" {
   metadata {
-    name      = "f2-realtime-config"
+    name      = "f2-realtime-config-${var.environment}"
     namespace = var.namespace
   }
 
   data = {
-    db_hostname = "${kubernetes_manifest.f2-cluster.object.metadata.name}-rw"
-    db_encryption_key = "jbZ/1S2hIN7C6iM512kPNaVq3KMERDOsR1r6y3ThGF2uxjrnOQ7NIJQFVNObRhHzE0iZpoVuPQ5Vz0lkMSvIXg=="
+    db_hostname          = "${kubernetes_manifest.f2-cluster.object.metadata.name}-rw.${var.environment}.svc.cluster.local"
+    db_encryption_key    = "jbZ/1S2hIN7C6iM5"
     postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-realtime-db.data.username}:${kubernetes_secret_v1.f2-realtime-db.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${kubernetes_secret_v1.f2-realtime-db.data.database}"
+    slot_name            = "f2-realtime-${var.environment}"
+    api_jwt_secret       = "a68866aa-92fa-4829-b475-31ec8f6e4da5"
   }
 
   type = "Opaque"
@@ -65,7 +67,7 @@ resource "kubernetes_secret_v1" "f2-realtime-config" {
 
 resource "kubernetes_deployment" "f2-realtime" {
   metadata {
-    name = "f2-realtime"
+    name      = "f2-realtime"
     namespace = var.namespace
     labels = {
       "f2.pub/app" = "f2-realtime-${var.environment}"
@@ -74,6 +76,7 @@ resource "kubernetes_deployment" "f2-realtime" {
 
   timeouts {
     create = "2m"
+    update = "2m"
   }
 
   spec {
@@ -112,15 +115,10 @@ resource "kubernetes_deployment" "f2-realtime" {
           }
 
           env {
-            name  = "DB_ENC_KEY"
-            value = "supabaserealtime"
-          }
-
-          env {
-            name = "DB_HOSTNAME"
+            name = "DB_HOST"
             value_from {
               secret_key_ref {
-                name = "f2-realtime-config"
+                name = kubernetes_secret_v1.f2-realtime-config.metadata[0].name
                 key  = "db_hostname"
               }
             }
@@ -130,8 +128,18 @@ resource "kubernetes_deployment" "f2-realtime" {
             name = "DB_USER"
             value_from {
               secret_key_ref {
-                name = "f2-realtime-db"
+                name = kubernetes_secret_v1.f2-realtime-db.metadata[0].name
                 key  = "username"
+              }
+            }
+          }
+
+          env {
+            name = "DB_NAME"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.f2-realtime-db.metadata[0].name
+                key  = "database"
               }
             }
           }
@@ -140,19 +148,55 @@ resource "kubernetes_deployment" "f2-realtime" {
             name = "DB_PASSWORD"
             value_from {
               secret_key_ref {
-                name = "f2-realtime-db"
+                name = kubernetes_secret_v1.f2-realtime-db.metadata[0].name
                 key  = "password"
               }
             }
           }
 
           env {
-            name = "DB_PORT"
+            name = "DB_ENC_KEY"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.f2-realtime-config.metadata[0].name
+                key  = "db_encryption_key"
+              }
+            }
           }
 
           env {
-            name  = "DB_USER"
-            value = "supabase_admin"
+            name = "API_JWT_SECRET"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.f2-realtime-config.metadata[0].name
+                key  = "api_jwt_secret"
+              }
+            }
+          }
+
+          env {
+            name = "SECRET_KEY_BASE"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.f2-auth-jwt.metadata[0].name
+                key  = "secret"
+              }
+            }
+          }
+
+          env {
+            name = "SLOT_NAME"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.f2-realtime-config.metadata[0].name
+                key  = "slot_name"
+              }
+            }
+          }
+
+          env {
+            name  = "DB_PORT"
+            value = "5432"
           }
 
           env {

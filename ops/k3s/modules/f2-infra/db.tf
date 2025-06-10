@@ -18,21 +18,29 @@ resource "kubernetes_manifest" "f2-cluster" {
       }
       "managed" = {
         "roles" = [{
-          "name" = kubernetes_secret_v1.f2-auth-db.data.username
-          "login" = true
+          "name"      = kubernetes_secret_v1.f2-auth-db.data.username
+          "login"     = true
           "superuser" = true
           "passwordSecret" = {
             "name" = kubernetes_secret_v1.f2-auth-db.metadata[0].name
           }
-        },
-        {
-          "name" = kubernetes_secret_v1.f2-analytics-db.data.username
-          "login" = true
-          "superuser" = true
-          "passwordSecret" = {
-            "name" = kubernetes_secret_v1.f2-analytics-db.metadata[0].name
+          },
+          {
+            "name"      = kubernetes_secret_v1.f2-analytics-db.data.username
+            "login"     = true
+            "superuser" = true
+            "passwordSecret" = {
+              "name" = kubernetes_secret_v1.f2-analytics-db.metadata[0].name
+            }
+          },
+          {
+            "name"      = kubernetes_secret_v1.f2-realtime-db.data.username
+            "login"     = true
+            "superuser" = true
+            "passwordSecret" = {
+              "name" = kubernetes_secret_v1.f2-realtime-db.metadata[0].name
+            }
           }
-        }
         ]
       }
       "instances" = 1
@@ -45,7 +53,7 @@ resource "kubernetes_manifest" "f2-cluster" {
 
 resource "kubernetes_secret_v1" "f2-bootstrap" {
   metadata {
-    name = "f2-bootstrap-${var.environment}"
+    name      = "f2-bootstrap-${var.environment}"
     namespace = var.namespace
   }
 
