@@ -1,0 +1,16 @@
+image: ubuntu/lts
+packages:
+  - git
+sources:
+  - git@git.sr.ht/~siennathesane/f2
+secrets:
+  - ee4895d7-d338-48d4-b081-cfb814bd5246
+  - 6144dd6c-30c1-4c80-8e66-9b4cab34d239
+tasks:
+  - sync: |
+      ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
+      cd f2
+      git config core.sshCommand 'ssh -i ~/.ssh/6144dd6c-30c1-4c80-8e66-9b4cab34d239'
+      git remote add github git@github.com:siennathesane/f2.git
+      git push github --mirror
