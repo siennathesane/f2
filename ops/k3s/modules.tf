@@ -8,7 +8,7 @@ module "contour" {
   source     = "./modules/contour"
 }
 
-module "f2" {
+module "f2-infra" {
   depends_on            = [module.bootstrap, module.cnpg, module.contour, module.cert-manager]
   source                = "./modules/f2-infra"
   environment           = var.environment
