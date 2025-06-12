@@ -27,5 +27,19 @@ resource "kubernetes_namespace" "cnpg_system" {
 resource "kubernetes_namespace" "contour" {
   metadata {
     name = "contour"
+
+    labels = {
+      "app.kubernetes.io/name" = "contour"
+    }
+  }
+}
+
+resource "kubernetes_namespace" "minio" {
+  metadata {
+    name = "minio-system"
+
+    labels = {
+      "app.kubernetes.io/name" = "minio"
+    }
   }
 }

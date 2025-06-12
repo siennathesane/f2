@@ -9,3 +9,7 @@ module "cnpg" {
 module "contour" {
   source = "./contour"
 }
+
+module "minio" {
+  source = "./minio"
+}
