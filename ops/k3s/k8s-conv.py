@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import os
+import re
 from pathlib import Path
 
 # Standard Kubernetes API groups/versions
@@ -30,6 +31,40 @@ STANDARD_API_GROUPS = {
     # 'admissionregistration.k8s.io/v1', 'admissionregistration.k8s.io/v1beta1',
 }
 
+def sanitize_filename(name):
+    """Convert a Kubernetes name to a valid filename."""
+    # Replace non-alphanumeric characters with underscores
+    name = re.sub(r'[^a-zA-Z0-9_-]', '_', name)
+    # Remove consecutive underscores
+    name = re.sub(r'_+', '_', name)
+    # Remove leading/trailing underscores
+    name = name.strip('_')
+    return name.lower()
+
+def generate_filename(doc, output_dir, index):
+    """Generate a unique filename for a Kubernetes resource."""
+    kind = doc.get('kind', 'unknown').lower()
+    metadata = doc.get('metadata', {})
+    name = metadata.get('name', f'unnamed_{index}')
+
+    # Sanitize names
+    kind_safe = sanitize_filename(kind)
+
+    # Build filename components
+    components = [kind_safe]
+
+    # Create base filename
+    base_name = '_'.join(components)
+
+    # Ensure uniqueness
+    output_path = output_dir / f"{base_name}.tf"
+    counter = 1
+    while output_path.exists():
+        output_path = output_dir / f"{base_name}_{counter}.tf"
+        counter += 1
+
+    return output_path
+
 def is_custom_resource(api_version, kind):
     """Determine if a resource is a CRD or custom resource."""
     # CRDs are always custom
@@ -47,9 +82,6 @@ def is_custom_resource(api_version, kind):
     # Core resources (no /) that aren't v1 are likely custom
     if api_version != 'v1':
         return True
-
-    if kind == 'Pod':
-        return False
 
     return False
 
@@ -103,6 +135,7 @@ def convert_with_k2tf(doc):
 
         return result.stdout
 
+
     except subprocess.CalledProcessError as e:
         print(f"Error running k2tf: {e.stderr}", file=sys.stderr)
         return None
@@ -117,8 +150,12 @@ def convert_with_k2tf(doc):
             except:
                 pass
 
-def process_manifest(input_file, output_file):
+
+def process_manifest(input_file, output_dir):
     """Process the Kubernetes manifest and convert to HCL."""
+    # Ensure output directory exists
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     # Read and parse YAML documents
     try:
         with open(input_file, 'r') as f:
@@ -138,13 +175,18 @@ def process_manifest(input_file, output_file):
         return 1
 
     print(f"Found {len(documents)} Kubernetes document(s)")
+    print(f"Output directory: {output_dir}")
+
+    # Track results
+    successful = 0
+    failed = 0
 
     # Process each document
-    hcl_outputs = []
     for i, doc in enumerate(documents):
         # Validate document has required fields
         if not isinstance(doc, dict):
             print(f"Document {i+1} is not a valid Kubernetes resource (not a dict)", file=sys.stderr)
+            failed += 1
             continue
 
         api_version = doc.get('apiVersion')
@@ -152,6 +194,7 @@ def process_manifest(input_file, output_file):
 
         if not api_version or not kind:
             print(f"Document {i+1} missing apiVersion or kind", file=sys.stderr)
+            failed += 1
             continue
 
         # Get metadata for better logging
@@ -161,6 +204,11 @@ def process_manifest(input_file, output_file):
 
         print(f"\nProcessing document {i+1}: {kind}/{name} in {namespace} ({api_version})")
 
+        # Generate output filename
+        output_file = generate_filename(doc, output_dir, i+1)
+        print(f"  -> Output file: {output_file.name}")
+
+        # Convert based on resource type
         if is_custom_resource(api_version, kind):
             print(f"  -> Using tfk8s (custom resource)")
             hcl = convert_with_tfk8s(doc)
@@ -169,33 +217,40 @@ def process_manifest(input_file, output_file):
             hcl = convert_with_k2tf(doc)
 
         if hcl:
-            hcl_outputs.append(hcl)
-            print(f"  -> Successfully converted")
+            # Write HCL to individual file
+            try:
+                with open(output_file, 'w') as f:
+                    # Add header comment
+                    f.write(f"# Generated from Kubernetes {kind}: {name}\n")
+                    if namespace and namespace != 'default':
+                        f.write(f"# Namespace: {namespace}\n")
+                    f.write(f"# API Version: {api_version}\n")
+                    if is_custom_resource(api_version, kind):
+                        f.write("# Type: Custom Resource (kubernetes_manifest)\n")
+                    else:
+                        f.write("# Type: Standard Resource\n")
+                    f.write("\n")
+                    f.write(hcl)
+                    if not hcl.endswith('\n'):
+                        f.write('\n')
+
+                print(f"  -> Successfully converted and saved")
+                successful += 1
+
+            except Exception as e:
+                print(f"  -> Error writing file: {e}", file=sys.stderr)
+                failed += 1
         else:
             print(f"  -> Failed to convert document {i+1}", file=sys.stderr)
+            failed += 1
 
-    if not hcl_outputs:
-        print("No documents were successfully converted.", file=sys.stderr)
-        return 1
+    # Summary
+    print(f"\nConversion complete:")
+    print(f"  Successful: {successful}")
+    print(f"  Failed: {failed}")
+    print(f"  Output directory: {output_dir}")
 
-    # Write all HCL outputs to single file
-    try:
-        with open(output_file, 'w') as f:
-            # Add header comment
-            f.write("# Generated from Kubernetes manifests\n")
-            f.write("# Custom resources use kubernetes_manifest resource type\n")
-            f.write("# Standard resources use their respective kubernetes provider types\n\n")
-
-            # Join all HCL outputs with newlines
-            f.write('\n\n'.join(hcl_outputs))
-            f.write('\n')
-
-        print(f"\nSuccessfully wrote HCL to {output_file}")
-        return 0
-
-    except Exception as e:
-        print(f"Error writing output file: {e}", file=sys.stderr)
-        return 1
+    return 0 if successful > 0 else 1
 
 def main():
     parser = argparse.ArgumentParser(
@@ -203,6 +258,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 This script converts Kubernetes YAML manifests to HashiCorp Configuration Language (HCL).
+Each Kubernetes resource is output to its own .tf file.
 
 For custom resource definitions and custom resources, it uses tfk8s to generate
 kubernetes_manifest resource types.
@@ -210,30 +266,38 @@ kubernetes_manifest resource types.
 For standard Kubernetes resources, it uses k2tf to generate the appropriate
 typed resources from the Kubernetes provider.
 
+Output files are named using the pattern:
+  <kind>_<namespace>_<name>.tf  (for namespaced resources)
+  <kind>_<name>.tf              (for cluster-wide resources)
+
 Requirements:
   - PyYAML (install with: pip install pyyaml)
   - tfk8s must be installed and available in PATH
   - k2tf must be installed and available in PATH
 
 Example:
-  %(prog)s deployment.yaml -o deployment.tf
-  %(prog)s manifests/*.yaml -o kubernetes.tf
+  %(prog)s deployment.yaml
+  %(prog)s manifests.yaml -o terraform/kubernetes/
         """
     )
 
     parser.add_argument('input', help='Input Kubernetes manifest YAML file')
-    parser.add_argument('-o', '--output', default='main.tf',
-                        help='Output HCL file (default: main.tf)')
+    parser.add_argument('-o', '--output-dir', default='terraform',
+                        help='Output directory for HCL files (default: terraform)')
 
     args = parser.parse_args()
 
     # Check if input file exists
-    if not Path(args.input).exists():
+    input_path = Path(args.input)
+    if not input_path.exists():
         print(f"Error: Input file '{args.input}' not found.", file=sys.stderr)
         return 1
 
+    # Convert output dir to Path
+    output_dir = Path(args.output_dir)
+
     # Process the manifest
-    return process_manifest(args.input, args.output)
+    return process_manifest(input_path, output_dir)
 
 if __name__ == '__main__':
     sys.exit(main())
