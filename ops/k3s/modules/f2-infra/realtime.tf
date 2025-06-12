@@ -14,7 +14,7 @@ resource "kubernetes_secret_v1" "f2-realtime-db" {
   data = {
     username = "f2realtime"
     password = random_password.f2-realtime-db-password.result
-    database = "_realtime"
+    database = local.f2-control-plane-db-name
   }
 
   type = "Opaque"
@@ -32,9 +32,9 @@ resource "kubernetes_secret_v1" "f2-realtime-config" {
   }
 
   data = {
-    db_hostname          = "${kubernetes_manifest.f2-cluster.object.metadata.name}-rw.${var.environment}.svc.cluster.local"
+    db_hostname          = "${kubectl_manifest.f2-cluster.name}-rw.${var.environment}.svc.cluster.local"
     db_encryption_key    = "jbZ/1S2hIN7C6iM5"
-    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-realtime-db.data.username}:${kubernetes_secret_v1.f2-realtime-db.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${local.f2-control-plane-db-name}"
+    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-realtime-db.data.username}:${kubernetes_secret_v1.f2-realtime-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw:5432/${local.f2-control-plane-db-name}"
     slot_name            = "f2-realtime-${var.environment}"
     api_jwt_secret       = "a68866aa-92fa-4829-b475-31ec8f6e4da5"
   }
@@ -84,7 +84,7 @@ resource "kubernetes_deployment" "f2-realtime" {
 
           env {
             name  = "DB_AFTER_CONNECT_QUERY"
-            value = "SET search_path TO _realtime"
+            value = "SET search_path TO ${local.f2-realtime-db-namespace}"
           }
 
           env {

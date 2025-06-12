@@ -1,10 +1,10 @@
 locals {
-  f2-analytics-db-namespace = "_analytics"
+  f2-analytics-db-namespace = "analytics"
 }
 
 resource "kubernetes_secret_v1" "f2-analytics-db" {
   metadata {
-    name      = "f2-analytics-db"
+    name      = "f2-analytics-db-${var.environment}"
     namespace = var.namespace
     labels = {
       "cnpg.io/reload" = "true"
@@ -26,26 +26,43 @@ resource "random_password" "f2-analytics-db-password" {
 
 resource "kubernetes_secret_v1" "f2-analytics-config" {
   metadata {
-    name      = "f2-analytics-config"
+    name      = "f2-analytics-config-${var.environment}"
     namespace = var.namespace
   }
 
   data = {
     db_database          = local.f2-control-plane-db-name
-    db_hostname          = "${kubernetes_manifest.f2-cluster.object.metadata.name}-rw"
+    db_hostname          = "${kubectl_manifest.f2-cluster.name}-rw"
     db_password          = kubernetes_secret_v1.f2-analytics-db.data.password
     db_encryption_key    = "rv9KN3oPYQjiI8U0w1JaeZaCvILZ0l1AEALj24qa9tFdCyQF6VD2lYDIEmoiNd/JBJQlXv4+Up39S0A8qiqTyQ=="
     api_key              = "JvmiXX7ZBep512JW20VFI2+32PxU4QImMP3HOjG+1VM9akNHUhFEuq+6PQcXg3OWn2Y4+gvXqve0f8i/tlikLg=="
-    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-analytics-db.data.username}:${kubernetes_secret_v1.f2-analytics-db.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${local.f2-control-plane-db-name}"
+    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-analytics-db.data.username}:${kubernetes_secret_v1.f2-analytics-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw:5432/${local.f2-control-plane-db-name}"
   }
 
   type = "Opaque"
 }
 
+resource "kubernetes_config_map_v1" "f2-analytics-initdb" {
+  metadata {
+    name      = "f2-analytics-initdb-sql-commands-${var.environment}"
+    namespace = var.namespace
+  }
+
+  data = {
+    "script.sql" = <<-EOT
+    ALTER USER ${kubernetes_secret_v1.f2-auth-config.data.username} WITH LOGIN CREATEROLE CREATEDB REPLICATION BYPASSRLS;
+    GRANT ${kubernetes_secret_v1.f2-auth-config.data.username} TO postgres;
+    CREATE SCHEMA IF NOT EXISTS ${local.f2-auth-db-namespace} AUTHORIZATION ${kubernetes_secret_v1.f2-auth-config.data.username};
+    GRANT CREATE ON DATABASE postgres TO ${kubernetes_secret_v1.f2-auth-config.data.username};
+    ALTER USER ${kubernetes_secret_v1.f2-auth-config.data.username} SET search_path = '${local.f2-auth-db-namespace}';
+    EOT
+  }
+}
+
 resource "kubernetes_deployment_v1" "f2-analytics" {
   depends_on = [kubernetes_secret_v1.f2-analytics-db]
   metadata {
-    name = "f2-analytics"
+    name = "f2-analytics-${var.environment}"
     labels = {
       "f2.pub/app" = "f2-analytics-${var.environment}"
     }
@@ -110,7 +127,7 @@ resource "kubernetes_deployment_v1" "f2-analytics" {
             name = "LOGFLARE_PUBLIC_ACCESS_TOKEN"
             value_from {
               secret_key_ref {
-                name = "f2-analytics-config"
+                name = kubernetes_secret_v1.f2-analytics-config.metadata[0].name
                 key  = "api_key"
               }
             }
@@ -119,7 +136,7 @@ resource "kubernetes_deployment_v1" "f2-analytics" {
             name = "POSTGRES_BACKEND_URL"
             value_from {
               secret_key_ref {
-                name = "f2-analytics-config"
+                name = kubernetes_secret_v1.f2-analytics-config.metadata[0].name
                 key  = "postgres_backend_url"
               }
             }
@@ -129,19 +146,14 @@ resource "kubernetes_deployment_v1" "f2-analytics" {
             value = local.f2-analytics-db-namespace
           }
           env {
-            name = "DB_DATABASE"
-            value_from {
-              secret_key_ref {
-                name = "f2-analytics-db"
-                key  = "database"
-              }
-            }
+            name  = "DB_DATABASE"
+            value = local.f2-control-plane-db-name
           }
           env {
             name = "DB_HOSTNAME"
             value_from {
               secret_key_ref {
-                name = "f2-analytics-config"
+                name = kubernetes_secret_v1.f2-analytics-config.metadata[0].name
                 key  = "db_hostname"
               }
             }
@@ -150,7 +162,7 @@ resource "kubernetes_deployment_v1" "f2-analytics" {
             name = "DB_USERNAME"
             value_from {
               secret_key_ref {
-                name = "f2-analytics-db"
+                name = kubernetes_secret_v1.f2-analytics-db.metadata[0].name
                 key  = "username"
               }
             }
@@ -159,7 +171,7 @@ resource "kubernetes_deployment_v1" "f2-analytics" {
             name = "DB_PASSWORD"
             value_from {
               secret_key_ref {
-                name = "f2-analytics-db"
+                name = kubernetes_secret_v1.f2-analytics-db.metadata[0].name
                 key  = "password"
               }
             }

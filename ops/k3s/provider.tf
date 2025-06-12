@@ -1,13 +1,13 @@
 terraform {
   required_providers {
 
-    helm = {
-      source  = "hashicorp/helm"
-      version = "2.17.0"
-    }
-
     kubernetes = {
       source = "hashicorp/kubernetes"
+    }
+
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.7.0"
     }
 
     random = {
@@ -16,12 +16,10 @@ terraform {
   }
 }
 
-provider "helm" {
-  kubernetes {
-    config_path = "~/.lima/k3s/copied-from-guest/kubeconfig.yaml"
-  }
+provider "kubernetes" {
+  config_path = "~/.lima/k3s/copied-from-guest/kubeconfig.yaml"
 }
 
-provider "kubernetes" {
+provider "kubectl" {
   config_path = "~/.lima/k3s/copied-from-guest/kubeconfig.yaml"
 }

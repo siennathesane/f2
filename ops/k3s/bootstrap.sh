@@ -20,22 +20,10 @@ terraform plan -target module.bootstrap -out=tfplan.bootstrap
 echo "Applying Bootstrap Module..."
 terraform apply -auto-approve tfplan.bootstrap
 
-echo "Planning Cert-Manager Module..."
-terraform plan -target module.cert-manager -out=tfplan.cert-manager
+echo "Planning..."
+terraform plan -out=tfplan.f2
 
-echo "Applying Cert-Manager Module..."
-terraform apply -auto-approve tfplan.cert-manager
-
-echo "Planning Terraform CNPG Module..."
-terraform plan -target module.cnpg -out=tfplan.cnpg
-
-echo "Applying Terraform CNPG Module..."
-terraform apply -auto-approve tfplan.cnpg
-
-echo "Planning f2 Module..."
-terraform plan -target module.f2 -out=tfplan.f2
-
-echo "Applying f2 Module..."
+echo "Applying ..."
 terraform apply -auto-approve tfplan.f2
 
 echo "Cleaning up..."

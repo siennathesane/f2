@@ -1,0 +1,24 @@
+# Generated from Kubernetes ServiceAccount: cert-manager
+# Namespace: cert-manager
+# API Version: v1
+# Type: Standard Resource
+
+resource "kubernetes_service_account" "cert_manager" {
+  metadata {
+    name      = "cert-manager"
+    namespace = "cert-manager"
+
+    labels = {
+      app                            = "cert-manager"
+      "app.kubernetes.io/component"  = "controller"
+      "app.kubernetes.io/instance"   = "cert-manager"
+      "app.kubernetes.io/managed-by" = "Helm"
+      "app.kubernetes.io/name"       = "cert-manager"
+      "app.kubernetes.io/version"    = "v1.18.0"
+      "helm.sh/chart"                = "cert-manager-v1.18.0"
+    }
+  }
+
+  automount_service_account_token = true
+}
+

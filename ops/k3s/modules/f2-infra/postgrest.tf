@@ -1,6 +1,12 @@
 locals {
   # a list of all available schemas for postgrest to view
-  f2-postgrest-schemas = "public,analytics,auth,graphql_public,realtime"
+  f2-postgrest-schemas = join(",", [
+    "public",
+    local.f2-analytics-db-namespace,
+    local.f2-auth-db-namespace,
+    "graphql_public",
+    local.f2-realtime-db-namespace
+  ])
 }
 
 resource "kubernetes_secret_v1" "f2-postgrest-creds" {
@@ -36,7 +42,7 @@ resource "kubernetes_secret_v1" "f2-postgrest-db-uri" {
   }
 
   data = {
-    db_uri = "postgresql://${kubernetes_secret_v1.f2-postgrest-creds.data.username}:${kubernetes_secret_v1.f2-postgrest-creds.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw.${var.environment}.svc.cluster.local:5432/${local.f2-control-plane-db-name}?sslmode=disable"
+    db_uri = "postgresql://${kubernetes_secret_v1.f2-postgrest-creds.data.username}:${kubernetes_secret_v1.f2-postgrest-creds.data.password}@${kubectl_manifest.f2-cluster.name}-rw.${var.environment}.svc.cluster.local:5432/${local.f2-control-plane-db-name}?sslmode=disable"
   }
 }
 
@@ -93,7 +99,7 @@ resource "kubernetes_deployment_v1" "f2-postgrest" {
 
           env {
             name  = "PGHOST"
-            value = "${kubernetes_manifest.f2-cluster.object.metadata.name}-rw"
+            value = "${kubectl_manifest.f2-cluster.name}-rw"
           }
 
           env {

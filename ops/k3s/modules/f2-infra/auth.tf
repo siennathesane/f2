@@ -51,7 +51,7 @@ resource "kubernetes_secret_v1" "f2-auth-db-uri" {
   }
 
   data = {
-    db_uri = "postgres://${kubernetes_secret_v1.f2-auth-config.data.username}:${kubernetes_secret_v1.f2-auth-config.data.password}@${kubernetes_manifest.f2-cluster.object.metadata.name}-rw:5432/${local.f2-control-plane-db-name}"
+    db_uri = "postgres://${kubernetes_secret_v1.f2-auth-config.data.username}:${kubernetes_secret_v1.f2-auth-config.data.password}@${kubectl_manifest.f2-cluster.name}-rw:5432/${local.f2-control-plane-db-name}"
   }
 }
 
@@ -100,7 +100,7 @@ resource "kubernetes_deployment_v1" "f2-auth" {
 
           env {
             name  = "PGHOST"
-            value = "${kubernetes_manifest.f2-cluster.object.metadata.name}-rw"
+            value = "${kubectl_manifest.f2-cluster.name}-rw"
           }
 
           env {
