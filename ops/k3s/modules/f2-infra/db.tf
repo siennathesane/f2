@@ -37,6 +37,7 @@ resource "kubectl_manifest" "f2-cluster" {
     kubernetes_secret_v1.f2-analytics-db,
     kubernetes_secret_v1.f2-realtime-db,
     kubernetes_secret_v1.f2-postgrest-creds,
+    kubernetes_secret_v1.f2-storage-db,
     kubectl_manifest.f2-image-catalog
   ]
   yaml_body = yamlencode({
@@ -116,6 +117,16 @@ resource "kubectl_manifest" "f2-cluster" {
             login     = false
             superuser = false
           },
+          {
+            name       = kubernetes_secret_v1.f2-storage-db.data.username
+            ensure     = "present"
+            login      = true
+            createrole = true
+            superuser  = true # todo(siennathesane): this is a blaring security hole, supabase/storage#708
+            passwordSecret = {
+              name = kubernetes_secret_v1.f2-storage-db.metadata[0].name
+            }
+          },
         ]
       }
       instances = 1
@@ -154,6 +165,10 @@ resource "kubectl_manifest" "f2-control-db" {
         {
           name  = local.f2-realtime-db-namespace
           owner = kubernetes_secret_v1.f2-realtime-db.data.username
+        },
+        {
+          name  = local.f2-storage-db-namespace
+          owner = kubernetes_secret_v1.f2-storage-db.data.username
         }
       ]
     }
