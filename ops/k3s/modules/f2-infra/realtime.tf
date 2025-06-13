@@ -223,7 +223,7 @@ resource "kubernetes_deployment" "f2-realtime" {
   }
 }
 
-resource "kubernetes_service" "f2-realtime" {
+resource "kubernetes_service_v1" "f2-realtime" {
   metadata {
     name      = "f2-realtime-${var.environment}"
     namespace = var.namespace

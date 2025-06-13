@@ -1,18 +1,22 @@
 variable "environment" {
-  type    = string
+  type = string
 }
 
 variable "namespace" {
-  type    = string
+  type = string
 }
 
 variable "ghcr-pull-secret-name" {
-  type    = string
+  type = string
 }
 
 variable "public-url" {
-  type    = string
+  type = string
 }
+
+# variable "public-realtime-url" {
+#   type = string
+# }
 
 variable "goauth-version" {
   type    = string

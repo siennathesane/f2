@@ -31,4 +31,5 @@ module "f2-infra" {
   ghcr-pull-secret-name = module.bootstrap.ghcr-pull-secret-name
   namespace             = module.bootstrap.f2-namespace
   public-url            = local.public-url
+  # public-realtime-url   = local.public-realtime-url
 }

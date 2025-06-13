@@ -1,0 +1,4 @@
+[toolchain]
+channel = "nightly"
+components = ["llvm-tools-preview", "miri", "llvm-tools", "rustfmt", "clippy"]
+profile = "default"

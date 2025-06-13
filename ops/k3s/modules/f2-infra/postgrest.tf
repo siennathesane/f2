@@ -244,7 +244,7 @@ resource "kubernetes_deployment_v1" "f2-postgrest" {
   }
 }
 
-resource "kubernetes_service" "f2-postgrest" {
+resource "kubernetes_service_v1" "f2-postgrest" {
   metadata {
     name      = "f2-postgrest-${var.environment}"
     namespace = var.namespace

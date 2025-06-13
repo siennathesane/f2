@@ -9,4 +9,5 @@ variable "environment" {
 
 locals {
   public-url = var.environment == "prod" ? "f2.pub" : "${var.environment}.f2.pub"
+  # public-realtime-url = "realtime.${local.public-url}"
 }
