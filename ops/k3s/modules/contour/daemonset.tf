@@ -30,10 +30,16 @@ resource "kubernetes_daemonset" "envoy" {
       spec {
         volume {
           name = "envoy-admin"
+          empty_dir {
+
+          }
         }
 
         volume {
           name = "envoy-config"
+          empty_dir {
+
+          }
         }
 
         volume {
@@ -104,14 +110,12 @@ resource "kubernetes_daemonset" "envoy" {
 
           port {
             name           = "http"
-            host_port      = 80
             container_port = 8080
             protocol       = "TCP"
           }
 
           port {
             name           = "https"
-            host_port      = 443
             container_port = 8443
             protocol       = "TCP"
           }

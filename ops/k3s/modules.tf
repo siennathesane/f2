@@ -1,5 +1,5 @@
 module "cnpg" {
-  depends_on = [module.bootstrap]
+  depends_on = [module.bootstrap, module.longhorn]
   source     = "./modules/cnpg"
 }
 
@@ -20,12 +20,17 @@ module "cert-manager" {
 }
 
 module "minio" {
-  depends_on = [module.bootstrap]
+  depends_on = [module.bootstrap, module.longhorn]
   source     = "./modules/minio"
 }
 
+module "longhorn" {
+  depends_on = [module.bootstrap]
+  source     = "./modules/longhorn"
+}
+
 module "f2-infra" {
-  depends_on            = [module.bootstrap, module.cnpg, module.contour, module.cert-manager, module.minio]
+  depends_on            = [module.bootstrap, module.cnpg, module.contour, module.cert-manager]
   source                = "./modules/f2-infra"
   environment           = var.environment
   ghcr-pull-secret-name = module.bootstrap.ghcr-pull-secret-name

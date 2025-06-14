@@ -87,25 +87,25 @@ resource "kubernetes_deployment" "f2-auth-middleware" {
             }
           }
 
-          liveness_probe {
-            http_get {
-              path = "/health"
-              port = "8080"
-            }
+          # liveness_probe {
+          #   http_get {
+          #     path = "/health"
+          #     port = "8080"
+          #   }
 
-            initial_delay_seconds = 10
-            period_seconds        = 30
-          }
+          #   initial_delay_seconds = 10
+          #   period_seconds        = 30
+          # }
 
-          readiness_probe {
-            http_get {
-              path = "/health"
-              port = "8080"
-            }
+          # readiness_probe {
+          #   http_get {
+          #     path = "/health"
+          #     port = "8080"
+          #   }
 
-            initial_delay_seconds = 5
-            period_seconds        = 10
-          }
+          #   initial_delay_seconds = 5
+          #   period_seconds        = 10
+          # }
         }
       }
     }

@@ -43,3 +43,9 @@ resource "kubernetes_namespace" "minio" {
     }
   }
 }
+
+resource "kubernetes_namespace" "longhorn_system" {
+  metadata {
+    name = "longhorn-system"
+  }
+}

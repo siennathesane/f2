@@ -13,3 +13,7 @@ module "contour" {
 module "minio" {
   source = "./minio"
 }
+
+module "longhorn" {
+  source = "./longhorn"
+}

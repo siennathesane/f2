@@ -35,7 +35,8 @@ resource "kubernetes_secret_v1" "f2-analytics-config" {
     db_hostname          = "${kubectl_manifest.f2-cluster.name}-rw"
     db_password          = kubernetes_secret_v1.f2-analytics-db.data.password
     db_encryption_key    = "rv9KN3oPYQjiI8U0w1JaeZaCvILZ0l1AEALj24qa9tFdCyQF6VD2lYDIEmoiNd/JBJQlXv4+Up39S0A8qiqTyQ=="
-    api_key              = "JvmiXX7ZBep512JW20VFI2+32PxU4QImMP3HOjG+1VM9akNHUhFEuq+6PQcXg3OWn2Y4+gvXqve0f8i/tlikLg=="
+    api_key              = "38040e21-9a55-4f1e-a381-fd6896e3265b"
+    private_api_key      = "baf0b1df-ed34-4e9c-9696-90fe280117b3"
     postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-analytics-db.data.username}:${kubernetes_secret_v1.f2-analytics-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw:5432/${local.f2-control-plane-db-name}"
   }
 
@@ -125,6 +126,15 @@ resource "kubernetes_deployment_v1" "f2-analytics" {
           }
           env {
             name = "LOGFLARE_PUBLIC_ACCESS_TOKEN"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.f2-analytics-config.metadata[0].name
+                key  = "api_key"
+              }
+            }
+          }
+          env {
+            name = "LOGFLARE_PRIVATE_ACCESS_TOKEN"
             value_from {
               secret_key_ref {
                 name = kubernetes_secret_v1.f2-analytics-config.metadata[0].name

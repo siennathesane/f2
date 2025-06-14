@@ -14,7 +14,7 @@ resource "kubernetes_deployment" "contour" {
   }
 
   spec {
-    replicas = 2
+    replicas = 1
 
     selector {
       match_labels = {
@@ -167,4 +167,3 @@ resource "kubernetes_deployment" "contour" {
     }
   }
 }
-

@@ -44,6 +44,9 @@ resource "kubernetes_deployment" "cnpg_cloudnative_pg" {
       spec {
         volume {
           name = "scratch-data"
+          empty_dir {
+
+          }
         }
 
         volume {

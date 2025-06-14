@@ -131,7 +131,8 @@ resource "kubectl_manifest" "f2-cluster" {
       }
       instances = 1
       storage = {
-        size = "1Gi"
+        size         = "1Gi"
+        storageClass = "longhorn"
       }
     }
   })

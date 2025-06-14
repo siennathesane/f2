@@ -22,3 +22,8 @@ variable "goauth-version" {
   type    = string
   default = "v2.175.0"
 }
+
+variable "logflare-version" {
+  type    = string
+  default = "1.11.0"
+}

@@ -79,7 +79,7 @@ resource "kubernetes_deployment_v1" "f2-meta" {
 
           env {
             name  = "PG_META_DB_HOST"
-            value = "${kubectl_manifest.f2-cluster.name}-rw.svc.${var.namespace}.cluster.local"
+            value = "${kubectl_manifest.f2-cluster.name}-rw.${var.namespace}.svc.cluster.local"
           }
 
           env {

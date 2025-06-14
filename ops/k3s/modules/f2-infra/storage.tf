@@ -231,7 +231,7 @@ resource "kubernetes_deployment_v1" "f2-storage-api" {
 
           env {
             name  = "STORAGE_S3_ENDPOINT"
-            value = "http://minio.svc.${var.namespace}.cluster.local:9000"
+            value = "http://minio.${var.namespace}.svc.cluster.local:9000"
           }
 
           env {

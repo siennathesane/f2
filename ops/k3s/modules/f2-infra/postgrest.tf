@@ -215,17 +215,6 @@ resource "kubernetes_deployment_v1" "f2-postgrest" {
             value = "false"
           }
 
-          liveness_probe {
-            http_get {
-              path = "/"
-              port = "http"
-            }
-
-            timeout_seconds   = 5
-            period_seconds    = 5
-            failure_threshold = 3
-          }
-
           readiness_probe {
             http_get {
               path = "/"
