@@ -70,37 +70,50 @@ resource "kubectl_manifest" "f2-cluster" {
       managed = {
         roles = [
           {
-            name      = kubernetes_secret_v1.f2-auth-config.data.username
-            ensure    = "present"
-            login     = true
-            superuser = false
+            name        = kubernetes_secret_v1.f2-auth-config.data.username
+            ensure      = "present"
+            login       = true
+            createdb    = true
+            createrole  = true
+            replication = true
+            bypassrls   = true
             passwordSecret = {
               name = kubernetes_secret_v1.f2-auth-config.metadata[0].name
             }
           },
           {
-            name      = kubernetes_secret_v1.f2-analytics-db.data.username
-            ensure    = "present"
-            login     = true
+            name   = kubernetes_secret_v1.f2-analytics-db.data.username
+            ensure = "present"
+            login  = true
+            # createdb    = true
+            # createrole  = true
+            # replication = true
+            # bypassrls   = true
             superuser = true # todo(siennathesane): this is a blaring security hole
             passwordSecret = {
               name = kubernetes_secret_v1.f2-analytics-db.metadata[0].name
             }
           },
           {
-            name      = kubernetes_secret_v1.f2-realtime-db.data.username
-            ensure    = "present"
-            login     = true
-            superuser = false
+            name        = kubernetes_secret_v1.f2-realtime-db.data.username
+            ensure      = "present"
+            login       = true
+            createdb    = true
+            createrole  = true
+            replication = true
+            bypassrls   = true
             passwordSecret = {
               name = kubernetes_secret_v1.f2-realtime-db.metadata[0].name
             }
           },
           {
-            name      = kubernetes_secret_v1.f2-postgrest-creds.data.username
-            ensure    = "present"
-            login     = true
-            superuser = false
+            name        = kubernetes_secret_v1.f2-postgrest-creds.data.username
+            ensure      = "present"
+            login       = true
+            createdb    = true
+            createrole  = true
+            replication = true
+            bypassrls   = true
             passwordSecret = {
               name = kubernetes_secret_v1.f2-postgrest-creds.metadata[0].name
             }
@@ -118,11 +131,14 @@ resource "kubectl_manifest" "f2-cluster" {
             superuser = false
           },
           {
-            name       = kubernetes_secret_v1.f2-storage-db.data.username
-            ensure     = "present"
-            login      = true
-            createrole = true
-            superuser  = true # todo(siennathesane): this is a blaring security hole, supabase/storage#708
+            name   = kubernetes_secret_v1.f2-storage-db.data.username
+            ensure = "present"
+            login  = true
+            # createdb    = true
+            # createrole  = true
+            # replication = true
+            # bypassrls   = true
+            superuser = true # todo(siennathesane): this is a blaring security hole, supabase/storage#708
             passwordSecret = {
               name = kubernetes_secret_v1.f2-storage-db.metadata[0].name
             }

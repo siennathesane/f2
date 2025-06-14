@@ -34,7 +34,7 @@ resource "kubernetes_secret_v1" "f2-realtime-config" {
   data = {
     db_hostname          = "${kubectl_manifest.f2-cluster.name}-rw.${var.environment}.svc.cluster.local"
     db_encryption_key    = "jbZ/1S2hIN7C6iM5"
-    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-realtime-db.data.username}:${kubernetes_secret_v1.f2-realtime-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw:5432/${local.f2-control-plane-db-name}"
+    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-realtime-db.data.username}:${kubernetes_secret_v1.f2-realtime-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw.${var.environment}.svc.cluster.local:5432/${local.f2-control-plane-db-name}"
     slot_name            = "f2-realtime-${var.environment}"
     api_jwt_secret       = "a68866aa-92fa-4829-b475-31ec8f6e4da5"
   }

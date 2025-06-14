@@ -44,6 +44,8 @@ resource "kubernetes_secret_v1" "longhorn-minio-storage-creds" {
   data = {
     AWS_ACCESS_KEY_ID     = "storage"
     AWS_SECRET_ACCESS_KEY = random_password.longhorn-minio-storage-password.result
+    CONSOLE_ACCESS_KEY    = "storage"
+    CONSOLE_SECRET_KEY    = random_password.longhorn-minio-storage-password.result
     username              = "storage"
     password              = random_password.longhorn-minio-storage-password.result
   }
@@ -141,7 +143,7 @@ resource "kubernetes_manifest" "longhorn-minio-tenant" {
               storageClassName = "local-path"
             }
           }
-          volumesPerServer = 1
+          volumesPerServer = 3
         },
       ]
       requestAutoCert = false

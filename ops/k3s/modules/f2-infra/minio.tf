@@ -42,8 +42,10 @@ resource "kubernetes_secret_v1" "f2-storage-creds" {
   }
 
   data = {
-    username = "storage"
-    password = random_password.f2-storage-password.result
+    username           = "storage"
+    password           = random_password.f2-storage-password.result
+    CONSOLE_ACCESS_KEY = "storage"
+    CONSOLE_SECRET_KEY = random_password.f2-storage-password.result
   }
 
   type = "Opaque"
@@ -97,6 +99,9 @@ resource "kubernetes_manifest" "f2-minio-tenant" {
         bucketDNS  = true
         enableSFTP = false
       }
+      buckets = [{
+        name = "f2-control-plane"
+      }]
       image     = "quay.io/minio/minio:latest"
       mountPath = "/export"
       pools = [

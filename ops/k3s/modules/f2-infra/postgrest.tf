@@ -54,7 +54,7 @@ resource "kubernetes_config_map_v1" "f2-postgrest-initdb" {
 
   data = {
     "script.sql" = <<-EOT
-    ALTER ROLE ${kubernetes_secret_v1.f2-postgrest-creds.data.username} NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
+    --- ALTER ROLE ${kubernetes_secret_v1.f2-postgrest-creds.data.username} NOINHERIT NOCREATEDB NOCREATEROLE NOSUPERUSER;
     GRANT ${kubernetes_secret_v1.f2-postgrest-creds.data.anon_username} TO ${kubernetes_secret_v1.f2-postgrest-creds.data.username};
     GRANT ${kubernetes_secret_v1.f2-postgrest-creds.data.web_username} TO ${kubernetes_secret_v1.f2-postgrest-creds.data.username};
     EOT
@@ -215,12 +215,12 @@ resource "kubernetes_deployment_v1" "f2-postgrest" {
             value = "false"
           }
 
-          readiness_probe {
-            http_get {
-              path = "/"
-              port = "http"
-            }
-          }
+          # readiness_probe {
+          #   http_get {
+          #     path = "/"
+          #     port = "http"
+          #   }
+          # }
 
           port {
             name           = "http"

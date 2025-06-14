@@ -31,8 +31,8 @@ resource "kubernetes_secret_v1" "f2-storage-config" {
   }
 
   data = {
-    database_url         = "postgres://${kubernetes_secret_v1.f2-storage-db.data.username}:${kubernetes_secret_v1.f2-storage-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw:5432/${local.f2-control-plane-db-name}"
-    database_pool_url    = "postgresql://${kubernetes_secret_v1.f2-storage-db.data.username}:${kubernetes_secret_v1.f2-storage-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw:5432/${local.f2-control-plane-db-name}"
+    database_url         = "postgres://${kubernetes_secret_v1.f2-storage-db.data.username}:${kubernetes_secret_v1.f2-storage-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw.${var.namespace}.svc.cluster.local:5432/${local.f2-control-plane-db-name}"
+    database_pool_url    = "postgresql://${kubernetes_secret_v1.f2-storage-db.data.username}:${kubernetes_secret_v1.f2-storage-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw.${var.namespace}.svc.cluster.local:5432/${local.f2-control-plane-db-name}"
     database_search_path = "${local.f2-storage-db-namespace}"
     s3_access_key        = kubernetes_secret_v1.f2-storage-creds.data.username
     s3_secret_key        = kubernetes_secret_v1.f2-storage-creds.data.password
@@ -226,12 +226,17 @@ resource "kubernetes_deployment_v1" "f2-storage-api" {
 
           env {
             name  = "STORAGE_S3_BUCKET"
-            value = "f2-control-bucket"
+            value = "f2-control-plane"
+          }
+
+          env {
+            name  = "REGION"
+            value = "us-east-1"
           }
 
           env {
             name  = "STORAGE_S3_ENDPOINT"
-            value = "http://minio.${var.namespace}.svc.cluster.local:9000"
+            value = "http://minio.${var.namespace}.svc.cluster.local"
           }
 
           env {
@@ -281,7 +286,7 @@ resource "kubernetes_deployment_v1" "f2-storage-api" {
 
           env {
             name  = "TUS_URL_PATH"
-            value = "/upload/resumable"
+            value = "/storage/v1/upload/resumable"
           }
 
           env {

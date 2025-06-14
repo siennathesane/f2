@@ -7,32 +7,6 @@ resource "kubernetes_manifest" "f2-consolidated-routes" {
       namespace = var.namespace
     }
     spec = {
-      virtualhost = {
-        fqdn = var.public-url
-        corsPolicy = {
-          allowCredentials = true
-          allowHeaders = [
-            "Content-Type",
-            "Authorization",
-            "apikey",
-            "Prefer",
-            "Range",
-            "Content-Profile"
-          ]
-          allowMethods = [
-            "GET",
-            "POST",
-            "PUT",
-            "DELETE",
-            "OPTIONS",
-            "PATCH"
-          ]
-          allowOrigin = [
-            "*"
-          ]
-          maxAge = "24h"
-        }
-      }
       routes = [
         # Open Auth Routes (no auth required) - most specific first
         {
@@ -348,6 +322,205 @@ resource "kubernetes_manifest" "f2-consolidated-routes" {
               namespace = var.namespace
             }
           }
+        }
+      ]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "f2-cluster-routes" {
+  manifest = {
+    apiVersion = "projectcontour.io/v1"
+    kind       = "HTTPProxy"
+    metadata = {
+      name      = "f2-cluster-routes-${var.environment}"
+      namespace = var.namespace
+    }
+    spec = {
+      virtualhost = {
+        fqdn = "${kubernetes_service_v1.f2-control-plane.metadata[0].name}.${var.namespace}.svc.cluster.local"
+        corsPolicy = {
+          allowCredentials = true
+          allowHeaders = [
+            "Content-Type",
+            "Authorization",
+            "apikey",
+            "Prefer",
+            "Range",
+            "Content-Profile"
+          ]
+          allowMethods = [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "OPTIONS",
+            "PATCH"
+          ]
+          allowOrigin = [
+            "*"
+          ]
+          maxAge = "24h"
+        }
+      }
+      includes = [{
+        name = kubernetes_manifest.f2-consolidated-routes.object.metadata.name
+        }
+      ]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "f2-internet-routes" {
+  manifest = {
+    apiVersion = "projectcontour.io/v1"
+    kind       = "HTTPProxy"
+    metadata = {
+      name      = "f2-internet-routes-${var.environment}"
+      namespace = var.namespace
+    }
+    spec = {
+      virtualhost = {
+        fqdn = var.public-fqdn
+        corsPolicy = {
+          allowCredentials = true
+          allowHeaders = [
+            "Content-Type",
+            "Authorization",
+            "apikey",
+            "Prefer",
+            "Range",
+            "Content-Profile"
+          ]
+          allowMethods = [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "OPTIONS",
+            "PATCH"
+          ]
+          allowOrigin = [
+            "*"
+          ]
+          maxAge = "24h"
+        }
+      }
+      includes = [{
+        name = kubernetes_manifest.f2-consolidated-routes.object.metadata.name
+        }
+      ]
+      routes = [{
+        conditions = [
+          {
+            prefix = "/realtime/v1/"
+          }
+        ]
+        pathRewritePolicy = {
+          replacePrefix = [
+            {
+              replacement = "/socket/"
+            }
+          ]
+        }
+        services = [
+          {
+            name = kubernetes_service_v1.f2-realtime.metadata[0].name
+            port = 4000
+          }
+        ]
+        authPolicy = {
+          extensionRef = {
+            name      = kubernetes_manifest.f2-api-key-auth.object.metadata.name
+            namespace = var.namespace
+          }
+        }
+        enableWebsockets = true
+      }]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "f2-realtime-cluster-routes" {
+  manifest = {
+    apiVersion = "projectcontour.io/v1"
+    kind       = "HTTPProxy"
+    metadata = {
+      name      = "f2-realtime-cluster-routes-${var.environment}"
+      namespace = var.namespace
+    }
+    spec = {
+      virtualhost = {
+        fqdn = "*.${kubernetes_service_v1.f2-control-plane.metadata[0].name}.${var.namespace}.svc.cluster.local"
+        corsPolicy = {
+          allowCredentials = true
+          allowHeaders = [
+            "Content-Type",
+            "Authorization",
+            "apikey",
+            "Prefer",
+            "Range",
+            "Content-Profile"
+          ]
+          allowMethods = [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "OPTIONS",
+            "PATCH"
+          ]
+          allowOrigin = [
+            "*"
+          ]
+          maxAge = "24h"
+        }
+      }
+      includes = [{
+        name = kubernetes_manifest.f2-consolidated-routes.object.metadata.name
+        }
+      ]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "f2-realtime-internet-routes" {
+  manifest = {
+    apiVersion = "projectcontour.io/v1"
+    kind       = "HTTPProxy"
+    metadata = {
+      name      = "f2-realtime-internet-routes-${var.environment}"
+      namespace = var.namespace
+    }
+    spec = {
+      virtualhost = {
+        fqdn = "*.${var.public-fqdn}"
+        corsPolicy = {
+          allowCredentials = true
+          allowHeaders = [
+            "Content-Type",
+            "Authorization",
+            "apikey",
+            "Prefer",
+            "Range",
+            "Content-Profile"
+          ]
+          allowMethods = [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "OPTIONS",
+            "PATCH"
+          ]
+          allowOrigin = [
+            "*"
+          ]
+          maxAge = "24h"
+        }
+      }
+      includes = [{
+        name = kubernetes_manifest.f2-consolidated-routes.object.metadata.name
         }
       ]
     }

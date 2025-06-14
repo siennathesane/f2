@@ -14,6 +14,10 @@ variable "public-url" {
   type = string
 }
 
+variable "public-fqdn" {
+  type = string
+}
+
 # variable "public-realtime-url" {
 #   type = string
 # }

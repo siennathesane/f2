@@ -32,12 +32,12 @@ resource "kubernetes_secret_v1" "f2-analytics-config" {
 
   data = {
     db_database          = local.f2-control-plane-db-name
-    db_hostname          = "${kubectl_manifest.f2-cluster.name}-rw"
+    db_hostname          = "${kubectl_manifest.f2-cluster.name}-rw.${var.namespace}.svc.cluster.local"
     db_password          = kubernetes_secret_v1.f2-analytics-db.data.password
     db_encryption_key    = "rv9KN3oPYQjiI8U0w1JaeZaCvILZ0l1AEALj24qa9tFdCyQF6VD2lYDIEmoiNd/JBJQlXv4+Up39S0A8qiqTyQ=="
     api_key              = "38040e21-9a55-4f1e-a381-fd6896e3265b"
     private_api_key      = "baf0b1df-ed34-4e9c-9696-90fe280117b3"
-    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-analytics-db.data.username}:${kubernetes_secret_v1.f2-analytics-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw:5432/${local.f2-control-plane-db-name}"
+    postgres_backend_url = "postgres://${kubernetes_secret_v1.f2-analytics-db.data.username}:${kubernetes_secret_v1.f2-analytics-db.data.password}@${kubectl_manifest.f2-cluster.name}-rw.${var.namespace}.svc.cluster.local:5432/${local.f2-control-plane-db-name}"
   }
 
   type = "Opaque"
@@ -51,11 +51,11 @@ resource "kubernetes_config_map_v1" "f2-analytics-initdb" {
 
   data = {
     "script.sql" = <<-EOT
-    ALTER USER ${kubernetes_secret_v1.f2-auth-config.data.username} WITH LOGIN CREATEROLE CREATEDB REPLICATION BYPASSRLS;
-    GRANT ${kubernetes_secret_v1.f2-auth-config.data.username} TO postgres;
-    CREATE SCHEMA IF NOT EXISTS ${local.f2-auth-db-namespace} AUTHORIZATION ${kubernetes_secret_v1.f2-auth-config.data.username};
-    GRANT CREATE ON DATABASE postgres TO ${kubernetes_secret_v1.f2-auth-config.data.username};
-    ALTER USER ${kubernetes_secret_v1.f2-auth-config.data.username} SET search_path = '${local.f2-auth-db-namespace}';
+    --- ALTER USER ${kubernetes_secret_v1.f2-auth-config.data.username} WITH LOGIN CREATEROLE CREATEDB REPLICATION BYPASSRLS;
+    --- GRANT ${kubernetes_secret_v1.f2-auth-config.data.username} TO postgres;
+    --- CREATE SCHEMA IF NOT EXISTS ${local.f2-auth-db-namespace} AUTHORIZATION ${kubernetes_secret_v1.f2-auth-config.data.username};
+    --- GRANT CREATE ON DATABASE postgres TO ${kubernetes_secret_v1.f2-auth-config.data.username};
+    --- ALTER USER ${kubernetes_secret_v1.f2-auth-config.data.username} SET search_path = '${local.f2-auth-db-namespace}';
     EOT
   }
 }
@@ -112,18 +112,22 @@ resource "kubernetes_deployment_v1" "f2-analytics" {
             container_port = 4000
             protocol       = "TCP"
           }
+
           env {
             name  = "LOGFLARE_SINGLE_TENANT"
             value = "true"
           }
+
           env {
             name  = "LOGFLARE_SUPABASE_MODE"
             value = "true"
           }
+
           env {
             name  = "LOGFLARE_NODE_HOST"
             value = "0.0.0.0"
           }
+
           env {
             name = "LOGFLARE_PUBLIC_ACCESS_TOKEN"
             value_from {

@@ -353,6 +353,7 @@ resource "kubernetes_persistent_volume_claim_v1" "f2-functions-storage" {
     }
   }
 
+  wait_until_bound = false
   # todo(siennathesane): implement ReadWriteMany later
   spec {
     access_modes = ["ReadWriteOnce"]

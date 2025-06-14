@@ -199,10 +199,12 @@ resource "kubernetes_deployment_v1" "f2-auth" {
             name  = "API_EXTERNAL_URL"
             value = "http://${var.public-url}"
           }
+
           env {
             name  = "GOTRUE_SITE_URL"
             value = "http://${var.public-url}"
           }
+
           env {
             name  = "GOTRUE_API_HOST"
             value = "0.0.0.0"
