@@ -124,8 +124,27 @@ resource "kubernetes_deployment_v1" "f2-analytics" {
           }
 
           env {
-            name  = "LOGFLARE_NODE_HOST"
+            name = "LOGFLARE_NODE_HOST"
+            value_from {
+              field_ref {
+                field_path = "status.podIP"
+              }
+            }
+          }
+
+          env {
+            name  = "LOGFLARE_NODE_PORT"
+            value = "4000"
+          }
+
+          env {
+            name  = "PHX_URL_HOST"
             value = "0.0.0.0"
+          }
+
+          env {
+            name  = "PHX_HTTP_PORT"
+            value = "4000"
           }
 
           env {
@@ -142,7 +161,7 @@ resource "kubernetes_deployment_v1" "f2-analytics" {
             value_from {
               secret_key_ref {
                 name = kubernetes_secret_v1.f2-analytics-config.metadata[0].name
-                key  = "api_key"
+                key  = "private_api_key"
               }
             }
           }
