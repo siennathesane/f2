@@ -1,6 +1,6 @@
 import React from 'react';
-import DocumentationScreen from '@/screens/docs/documentationScreen';
+import Document from "@/screens/docs/document";
 
 export default function DocSlugScreen() {
-    return <DocumentationScreen />;
+    return <Document />;
 }
