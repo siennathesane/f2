@@ -1,3 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Browser reset - remove default margins/padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+/* Ensure the root React app fills the viewport */
+#root, #__next {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Fix for Expo web */
+body > div:first-child {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}

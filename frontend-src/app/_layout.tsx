@@ -1,5 +1,7 @@
+import {DrawerToggleProvider} from "@/contexts/drawerToggleContext";
+
 if (typeof global.Buffer === 'undefined') {
-    const { Buffer } = require('buffer');
+    const {Buffer} = require('buffer');
     global.Buffer = Buffer;
 }
 
@@ -13,18 +15,15 @@ import {
 } from "@react-navigation/native";
 import {useFonts} from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import {useEffect} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {GluestackUIProvider} from "@/components/ui/gluestack-ui-provider";
 import {useColorScheme} from "@/components/useColorScheme";
 import "../global.css";
-import {SafeAreaView} from "react-native";
 import {Drawer} from "expo-router/drawer";
-import {Header} from "@/components/header";
-import {
-    DrawerContentScrollView,
-    DrawerItemList,
-} from '@react-navigation/drawer';
-
+import {MainDrawer} from "@/app/mainDrawer";
+import {Header} from "@/components/ui/header/header";
+import {SafeAreaView} from "react-native";
+import {Box} from "@/components/ui/box";
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -35,15 +34,6 @@ export const unstable_settings = {
     // Ensure that reloading on `/modal` keeps a back button present.
     initialRouteName: "index",
 };
-
-function CustomDrawerContent(props) {
-    return (
-        <DrawerContentScrollView {...props}>
-            <DrawerItemList {...props} />
-            {/* You can add more custom content here */}
-        </DrawerContentScrollView>
-    );
-}
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -74,36 +64,41 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
     const colorScheme = useColorScheme();
+    const [navigation, setNavigation] = useState<any>(null);
+
+    const toggleDrawer = useCallback(() => {
+        if (navigation) {
+            // Use React Navigation's DrawerActions
+            const { DrawerActions } = require('@react-navigation/native');
+            navigation.dispatch(DrawerActions.toggleDrawer());
+        }
+    }, [navigation]);
 
     return (
         <GluestackUIProvider mode={(colorScheme ?? "light") as "light" | "dark"}>
             <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-                <SafeAreaView className="flex-1 bg-background-primary">
-                    <Drawer
-                        drawerContent={(props) => <CustomDrawerContent {...props} />}
-                        screenOptions={{
-                            header: () => <Header/>,
-                            headerShown: true
-                        }}
-                    >
-                        {/* Define your drawer screens here */}
-                        <Drawer.Screen
-                            name="index"
-                            options={{
-                                drawerLabel: "Home",
-                                title: "Home"
-                            }}
-                        />
-                        {/* Add more screens as needed */}
-                        <Drawer.Screen
-                            name="docs/index"
-                            options={{
-                                drawerLabel: "Documentation",
-                                title: "Documentation"
-                            }}
-                        />
-                    </Drawer>
-                </SafeAreaView>
+                <DrawerToggleProvider value={toggleDrawer}>
+                    <SafeAreaView className="flex-1 bg-background-primary">
+                        <Header />
+                        <Box className="flex-1">
+                            <Drawer
+                                drawerContent={(props) => {
+                                    // Capture navigation when drawer renders
+                                    if (!navigation && props.navigation) {
+                                        setNavigation(props.navigation);
+                                    }
+                                    return <MainDrawer {...props} />;
+                                }}
+                                screenOptions={{
+                                    headerShown: false,
+                                    // ... rest of options
+                                }}
+                            >
+                                {/* All your screens */}
+                            </Drawer>
+                        </Box>
+                    </SafeAreaView>
+                </DrawerToggleProvider>
             </ThemeProvider>
         </GluestackUIProvider>
     );

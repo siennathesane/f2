@@ -4,9 +4,7 @@ import { Platform } from 'react-native';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import matter from 'gray-matter';
-
-// Import the registry directly
-import { docsModules, docsMetadata } from '../src/docs-registry.generated';
+import { docsModules, docsMetadata } from '@/src/docs-registry.generated';
 
 export interface DocFrontmatter {
     title: string;
@@ -180,11 +178,6 @@ ${e.stack || 'No stack trace available'}
                         categoriesSet.add(metadata.category);
                     }
                 }
-
-                console.log('🎉 All docs loaded successfully');
-                console.log('📊 Final docs count:', Object.keys(docsData).length);
-                console.log('📂 Categories:', Array.from(categoriesSet));
-
                 setState({
                     docs: docsData,
                     loading: false,
