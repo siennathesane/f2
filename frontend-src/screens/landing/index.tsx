@@ -6,35 +6,10 @@ import {Center} from "@/components/ui/center";
 import {VStack} from "@/components/ui/vstack";
 import {Text} from "@/components/ui/text";
 import {ScrollView} from "@/components/ui/scroll-view";
-import {verifyInstallation} from "nativewind";
 
 export const LandingScreen = () => {
     return (
         <Box className="flex-1 bg-background-primary text-text-primary">
-            {/* Sticky Header */}
-            <Box className="border-b border-outline-200 sticky top-0 z-10">
-                <HStack className="justify-start items-center px-6 py-4 max-w-screen-xl mx-auto">
-                    <Text className="text-xl font-bold font-mono text-typography-900 mr-8">
-                        f2
-                    </Text>
-
-                    {/*<HStack className="space-x-6 hidden md:flex">*/}
-                    {/*  <Pressable>*/}
-                    {/*    <Text className="text-typography-600 text-sm">Docs</Text>*/}
-                    {/*  </Pressable>*/}
-                    {/*  <Pressable>*/}
-                    {/*    <Text className="text-typography-600 text-sm">Showcase</Text>*/}
-                    {/*  </Pressable>*/}
-                    {/*  <Pressable>*/}
-                    {/*    <Text className="text-typography-600 text-sm">Blog</Text>*/}
-                    {/*  </Pressable>*/}
-                    {/*  <Pressable>*/}
-                    {/*    <Text className="text-typography-600 text-sm">Community</Text>*/}
-                    {/*  </Pressable>*/}
-                    {/*</HStack>*/}
-                </HStack>
-            </Box>
-
             {/* Scrollable Content */}
             <ScrollView className="flex-1">
                 <Box className="flex-1">

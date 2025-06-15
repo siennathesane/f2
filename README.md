@@ -4,7 +4,7 @@
 
 ## Ethics
 
-For a complete guide on how to ethically and morally approach this problem space, see the [ethics.md](./ethics.md) file. In general, we must remember that this system is a weapon. Like any weapon, it can be used for moral good or ethical evil, and it is up to us to decide how we will use it.
+For a complete guide on how to ethically and morally approach this problem space, see the [ethics.md](docs/ethics.md) file. In general, we must remember that this system is a weapon. Like any weapon, it can be used for moral good or ethical evil, and it is up to us to decide how we will use it.
 
 We are going to ask people to voluntarily surrender their sensitive data to us. We will use it to identify people at places & times, use it to build better models for facial recognition, use it to run search engine queries, and all kinds of other correlary tasks. Is this ethical?
 

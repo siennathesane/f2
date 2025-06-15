@@ -1,3 +1,4 @@
+// metro.config.js
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("path");
 const { withNativeWind } = require("nativewind/metro");
@@ -7,11 +8,20 @@ const config = getDefaultConfig(projectRoot, {
   isCSSEnabled: false,
 });
 
-// 1. Watch all files within the monorepo
-// 2. Let Metro know where to resolve packages and in what order
-config.resolver.nodeModulesPaths = [path.resolve(projectRoot, "node_modules")];
-// config.resolver.sourceExts.push('css');
+// Watch the ../docs folder for changes
+config.watchFolders = [
+  path.resolve(projectRoot, "../docs"),
+];
 
-// module.exports = config;
+// Move "md" from sourceExts to assetExts
+config.resolver.assetExts = [...config.resolver.assetExts, "md"];
 
-module.exports = withNativeWind(config, { input: "./global.css" });
+// Keep your existing transformer setup
+config.transformer.assetPlugins = ['expo-asset/tools/hashAssetFiles'];
+
+// Keep your existing nodeModulesPaths
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, "node_modules")
+];
+
+module.exports = withNativeWind(config, { input: "./global.css" })

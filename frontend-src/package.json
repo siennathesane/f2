@@ -3,15 +3,16 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "npx expo start --clear",
-    "android": "npx expo start --android --clear",
-    "ios": "npx expo start --ios --clear",
-    "web": "npx expo start --web --clear",
-    "package:web": "npx expo export -p web",
-    "deploy:gamma": "yarn package:web && wrangler deploy --env gamma",
-    "deploy:prod": "yarn package:web && wrangler deploy --env prod",
+    "start": "yarn prebuild && npx expo start --clear",
+    "android": "yarn prebuild && npx expo start --android --clear",
+    "ios": "yarn prebuild && npx expo start --ios --clear",
+    "web": "yarn prebuild && npx expo start --web --clear",
+    "package:web": "yarn prebuild && npx expo export -p web",
+    "deploy:gamma": "yarn prebuild && yarn package:web && wrangler deploy --env gamma",
+    "deploy:prod": "yarn prebuild && yarn package:web && wrangler deploy --env prod",
     "test": "jest --watchAll",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "prebuild": "./prebuild.sh"
   },
   "jest": {
     "preset": "jest-expo"
@@ -50,6 +51,7 @@
     "@gluestack-ui/tooltip": "^0.1.32",
     "@hookform/resolvers": "^3.3.4",
     "@legendapp/motion": "^2.4.0",
+    "@react-navigation/drawer": "^7.4.2",
     "@react-navigation/native": "^7.1.6",
     "@unitools/image": "^0.0.4",
     "@unitools/image-expo": "^0.0.5",
@@ -59,6 +61,8 @@
     "@unitools/router": "^0.0.4",
     "@unitools/router-expo": "^0.0.1",
     "expo": "~53.0.11",
+    "expo-asset": "^11.1.5",
+    "expo-file-system": "^18.1.10",
     "expo-font": "~13.3.1",
     "expo-image": "~2.2.0",
     "expo-linking": "~7.1.5",
@@ -68,6 +72,7 @@
     "expo-system-ui": "~5.0.8",
     "expo-updates": "~0.28.14",
     "expo-web-browser": "~14.1.6",
+    "gray-matter": "^4.0.3",
     "lucide-react-native": "^0.378.0",
     "nativewind": "4.1.23",
     "react": "19.0.0",
@@ -91,6 +96,7 @@
     "jest": "^29.2.1",
     "jest-expo": "~53.0.7",
     "jscodeshift": "0.15.2",
+    "react-native-markdown-display": "^7.0.2",
     "react-test-renderer": "18.2.0",
     "typescript": "~5.8.3",
     "wrangler": "^4.19.1"
