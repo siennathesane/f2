@@ -28,6 +28,7 @@ You will need:
 * [`Expo`](https://expo.dev/): for compiling and running the frontend services
 * [`xcode`](https://developer.apple.com/xcode/): for running the frontend services on iOS (can use a standalone device if you have windows/linux)
 * [`yarn`](https://yarnpkg.com/getting-started/install): for building the frontend services
+* [`supabase-cli`](https://supabase.com/docs/guides/cli/installation): for pushing any necessary functions
 
 I have a few aliases that I use to save myself a whole lot of typing:
 
@@ -65,6 +66,8 @@ cd ops/k3s
 ```
 
 That will completely bootstrap the entire backend. If for some reason terraform fails, just run `./bootstrap.sh dev` again. If that doesn't work, just ping me on Discord.
+
+There are also code generators that are needed for the backend services as well. For example, to generate any necessary protocol buffers, you will need `protoc`, the various `protoc-gen-*` plugins, and `buf`. You can find more details in the backend readme.
 
 #### Frontend
 
