@@ -2,6 +2,20 @@
 
 #### __f*ck the fascists.__
 
+## Ethics
+
+For a complete guide on how to ethically and morally approach this problem space, see the [ethics.md](./ethics.md) file. In general, we must remember that this system is a weapon. Like any weapon, it can be used for moral good or ethical evil, and it is up to us to decide how we will use it.
+
+We are going to ask people to voluntarily surrender their sensitive data to us. We will use it to identify people at places & times, use it to build better models for facial recognition, use it to run search engine queries, and all kinds of other correlary tasks. Is this ethical?
+
+Is it ethical that governments like the United States, China, Russia, and others use technologies like this to track and control their citizens?
+
+Is it ethical that corporations like Facebook, Google, and Amazon use technologies like this to track and control their customers?
+
+I don't believe it is. I believe it is imperative that we give the people the power to fight back. However we must not fall into the trap of capitalism and surveillance. We are not here to watch the people, but to empower them to watch out for each other.
+
+This system is a weapon and we must approach and treat it with the respect it deserves.
+
 ## Repo Architecture
 
 * [backend-src](./backend-src): Backend Rust & Typescript code used for the backend services.
