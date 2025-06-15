@@ -9,6 +9,20 @@ members = [
 #    "crates/cargo-docker",
     "crates/utils"]
 
+[workspace.dependencies]
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+base64 = "0.22"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+jsonwebtoken = "9.2"
+chrono = "0.4.41"
+envoy-types = "0.6.0"
+hyper-util = "0.1.14"
+tonic = "0.13.1"
+f2-utils = { path = "../utils" }
+
 [[bin]]
 name = "auth-svc"
 path = "crates/auth-svc/src/main.rs"

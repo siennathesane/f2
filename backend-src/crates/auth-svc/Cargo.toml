@@ -13,17 +13,15 @@ name = "auth-svc"
 path = "src/main.rs"
 
 [dependencies]
-axum = "0.7"
-tokio = { version = "1.0", features = ["full"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-base64 = "0.22"
-anyhow = "1.0"
-tracing = "0.1"
-tracing-subscriber = "0.3"
-jsonwebtoken = "9.2"
-chrono = "0.4.41"
-envoy-types = "0.6.0"
-tonic = "0.13.1"
+tokio = { workspace = true, features = ["full"] }
+serde = { workspace = true, features = ["derive"] }
+base64 = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+jsonwebtoken = { workspace = true }
+chrono = { workspace = true }
+envoy-types = { workspace = true }
+hyper-util = { workspace = true }
+tonic = { workspace = true }
 f2-utils = { path = "../utils" }
-hyper-util = "0.1.14"

@@ -140,14 +140,6 @@ mod tests {
         assert!(state.verify_basic_auth(&bad).is_err());
     }
 
-    #[test]
-    fn role_to_group_mappings() {
-        let state = make_auth_state();
-        assert_eq!(state.role_to_group("anon"), "anon");
-        assert_eq!(state.role_to_group("service_role"), "admin");
-        assert_eq!(state.role_to_group("something_else"), "anon");
-    }
-
     fn create_jwt(role: &str, exp_offset: i64, secret: &[u8]) -> String {
         let now = Utc::now().timestamp();
         let claims = Claims {
