@@ -6,7 +6,7 @@ params:
 title: Ethics Guide
 ---
 
-# Ethics Guide
+# They're More Like Guidelines...
 
 This guide is not a comprehensive list of all ethical considerations but rather a starting point for understanding the ethical implications of the system we are building.
 

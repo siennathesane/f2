@@ -1,0 +1,1 @@
+export { DocumentContent } from './documentContent';

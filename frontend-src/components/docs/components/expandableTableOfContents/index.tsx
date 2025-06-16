@@ -1,0 +1,1 @@
+export { ExpandableTableOfContents } from './expandableTableOfContents';

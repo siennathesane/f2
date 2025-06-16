@@ -4,10 +4,15 @@ import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 import { Pressable } from "@/components/ui/pressable";
 import { SquareMenu } from "lucide-react-native";
-import {useDrawerToggle} from "@/contexts/drawerToggleContext";
+import { useDrawerToggle } from "@/contexts/drawerToggleContext";
+import { router } from "expo-router";
 
 export const Header = () => {
     const toggleDrawer = useDrawerToggle();
+
+    const handleHomePress = () => {
+        router.push('/');
+    };
 
     return (
         <Box className="border-b border-outline-200 bg-background-primary">
@@ -20,11 +25,15 @@ export const Header = () => {
                     <SquareMenu size={28} className="text-gray-700" />
                 </Pressable>
 
-                <Box className="items-center flex-1">
+                <Pressable
+                    onPress={handleHomePress}
+                    className="items-center flex-1"
+                    hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+                >
                     <Text className="text-3xl font-bold font-mono text-typography-900">
                         f2
                     </Text>
-                </Box>
+                </Pressable>
 
                 <Box className="w-16"/>
             </HStack>

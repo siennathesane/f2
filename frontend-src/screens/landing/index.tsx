@@ -7,6 +7,7 @@ import {VStack} from "@/components/ui/vstack";
 import {Text} from "@/components/ui/text";
 import {ScrollView} from "@/components/ui/scroll-view";
 import Logo from "@/components/logo";
+import {PageFooter} from "@/components/ui/footer";
 
 export const LandingScreen = () => {
     return (
@@ -26,7 +27,8 @@ export const LandingScreen = () => {
 
                                 <Text
                                     className="text-lg md:text-xl text-center text-typography-600 max-w-3xl leading-relaxed">
-                                    The same class of intelligence tools that billion-dollar companies use, now being built by the people, for the people.
+                                    The same class of intelligence tools that billion-dollar companies use, now being
+                                    built by the people, for the people.
                                 </Text>
 
                                 <Box className="bg-yellow-200 border-2 border-yellow-400 px-8 py-4 rounded-lg mt-8">
@@ -53,7 +55,9 @@ export const LandingScreen = () => {
                                             Why?
                                         </Text>
                                         <Text className="text-typography-600 leading-relaxed">
-                                            Governments, corporations, and organizations are using data and AI to surveil, censor, and control us. They're partnering with known hate groups. These groups must be held accountable.
+                                            Governments, corporations, and organizations are using data and AI to
+                                            surveil, censor, and control us. They're partnering with known hate groups.
+                                            These groups must be held accountable.
                                         </Text>
                                     </VStack>
 
@@ -67,7 +71,10 @@ export const LandingScreen = () => {
                                             Tools for the People
                                         </Text>
                                         <Text className="text-typography-600 leading-relaxed">
-                                            We are building modern, competitive tools that anyone can use to analyze and visualize data, spot patterns, and share insights. If companies like Palantir are allowed to help the government target us, we can make our own tools to fight back.
+                                            We are building modern, competitive tools that anyone can use to analyze and
+                                            visualize data, spot patterns, and share insights. If companies like
+                                            Palantir are allowed to help the government target us, we can make our own
+                                            tools to fight back.
                                         </Text>
                                     </VStack>
 
@@ -81,7 +88,10 @@ export const LandingScreen = () => {
                                             Getting Involved
                                         </Text>
                                         <Text className="text-typography-600 leading-relaxed">
-                                            Right now we are building the foundation of{' '}<Logo />. The best way to get involved is to continue to gather data, share insights, and build community. We will ask for your gathered data when we are ready to start onboarding users.
+                                            Right now we are building the foundation of{' '}<Logo/>. The best way to get
+                                            involved is to continue to gather data, share insights, and build community.
+                                            We will ask for your gathered data when we are ready to start onboarding
+                                            users.
                                         </Text>
                                     </VStack>
                                 </HStack>
@@ -98,7 +108,8 @@ export const LandingScreen = () => {
                                 </Text>
 
                                 <Text className="text-lg text-center text-typography-600 leading-relaxed max-w-2xl">
-                                    Get support, share ideas, and connect with others who care about protecting our communities from those who wish to do us harm.
+                                    Get support, share ideas, and connect with others who care about protecting our
+                                    communities from those who wish to do us harm.
                                 </Text>
 
                                 <HStack className="space-x-4 mt-8">

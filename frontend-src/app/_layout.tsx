@@ -24,6 +24,7 @@ import {MainDrawer} from "@/app/mainDrawer";
 import {Header} from "@/components/ui/header/header";
 import {SafeAreaView} from "react-native";
 import {Box} from "@/components/ui/box";
+import {Footer} from "@/components/ui/footer";
 
 export {
     // Catch any errors thrown by the Layout component.

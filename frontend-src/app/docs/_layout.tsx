@@ -8,18 +8,12 @@ export default function DocsLayout() {
         <DocsProvider>
             <Stack
                 screenOptions={{
-                    headerStyle: { backgroundColor: 'var(--bg-background-primary)' },
-                    headerTintColor: 'var(--text-text-primary)',
-                    headerTitleStyle: { color: 'var(--text-text-primary)' }
+                    headerShown: false,
                 }}
             >
                 <Stack.Screen
-                    name="index"
-                    options={{ title: 'Documentation' }}
-                />
-                <Stack.Screen
-                    name="[slug]"
-                    options={{ title: 'Document' }}
+                    name="[...slug]"
+                    options={{ headerShown: false }}
                 />
             </Stack>
         </DocsProvider>

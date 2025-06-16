@@ -1,0 +1,1 @@
+export { PageFooter } from './footer';

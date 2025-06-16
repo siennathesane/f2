@@ -1,0 +1,1 @@
+export { HorizontalCategoryTabs } from './horizontalCategoryTabs';
