@@ -13,4 +13,4 @@ order: 1
 
 We currently have the following image processing workflows:
 
-- [Image Processing Pipeline](/docs/workflows/image-processing-pipeline)
+- [Image Processing Pipeline](/docs/workflows/image-processing)

@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import matter from 'gray-matter';
-import { docsModules, docsMetadata } from '@/src/docs-registry.generated';
+import {docsMetadata, docsModules} from "@/components/docs/constants/docRegistry.generated";
 
 export interface DocFrontmatter {
     title: string;

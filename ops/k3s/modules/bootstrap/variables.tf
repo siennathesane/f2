@@ -1,3 +1,7 @@
 variable "environment" {
-  type    = string
+  type = string
+}
+
+variable "dockerconfigjson" {
+  type = string
 }

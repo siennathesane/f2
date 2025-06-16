@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { TouchableOpacity, Platform } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { MermaidRenderer } from '../mermaidRenderer';
+import { useColorScheme } from '@/components/useColorScheme';
+
+// For web - use the full react-syntax-highlighter
+const WebSyntaxHighlighter = Platform.OS === 'web' ?
+    require('react-syntax-highlighter').default : null;
+const webStyles = Platform.OS === 'web' ?
+    require('react-syntax-highlighter/dist/esm/styles/hljs') : null;
+
+// For React Native - use the react-native wrapper with safe styles
+const NativeSyntaxHighlighter = Platform.OS !== 'web' ?
+    require('react-native-syntax-highlighter').default : null;
+const nativeStyles = Platform.OS !== 'web' ?
+    require('react-syntax-highlighter/dist/esm/styles/hljs') : null;
 
 interface CodeBlockProps {
     children: string;
@@ -13,6 +26,7 @@ interface CodeBlockProps {
 
 export function CodeBlock({ children, className }: CodeBlockProps) {
     const [activeTab, setActiveTab] = useState('npm');
+    const colorScheme = useColorScheme();
 
     // Extract language from className (e.g., "language-mermaid" -> "mermaid")
     const language = className?.replace('language-', '') || '';
@@ -41,6 +55,10 @@ export function CodeBlock({ children, className }: CodeBlockProps) {
                 .replace(/npm start/g, targetManager === 'yarn' ? 'yarn start' : `${targetManager} start`);
         };
 
+        const HighlighterComponent = Platform.OS === 'web' ? WebSyntaxHighlighter : NativeSyntaxHighlighter;
+        const styles = Platform.OS === 'web' ? webStyles : nativeStyles;
+        const convertedCommand = convertCommand(children, activeTab);
+
         return (
             <VStack className="my-4">
                 {/* Tabs */}
@@ -66,17 +84,64 @@ export function CodeBlock({ children, className }: CodeBlockProps) {
                     ))}
                 </HStack>
 
-                {/* Code content */}
+                {/* Code content with syntax highlighting */}
                 <Box className="bg-background-tertiary border border-border-primary rounded-b-lg p-4">
-                    <Text className="font-mono text-sm text-text-primary">
-                        {convertCommand(children, activeTab)}
-                    </Text>
+                    {Platform.OS === 'web' && HighlighterComponent && styles ? (
+                        <HighlighterComponent
+                            language="bash"
+                            style={colorScheme === 'dark' ? styles.atomOneDark : styles.atomOneLight}
+                            customStyle={{
+                                margin: 0,
+                                padding: 0,
+                                backgroundColor: 'transparent',
+                                fontSize: 14,
+                                lineHeight: 1.5,
+                            }}
+                            wrapLongLines={true}
+                        >
+                            {convertedCommand}
+                        </HighlighterComponent>
+                    ) : Platform.OS !== 'web' && HighlighterComponent && nativeStyles ? (
+                        <HighlighterComponent
+                            language="bash"
+                            style={nativeStyles.docco} // Use safe native styles
+                            fontSize={14}
+                            highlighter="highlightjs"
+                            fontFamily="monospace"
+                        >
+                            {convertedCommand}
+                        </HighlighterComponent>
+                    ) : (
+                        <Text className="font-mono text-sm text-text-primary">
+                            {convertedCommand}
+                        </Text>
+                    )}
                 </Box>
             </VStack>
         );
     }
 
-    // Regular code block with syntax highlighting hint
+    // Regular code block with syntax highlighting
+    const getSyntaxHighlighterLanguage = (lang: string): string => {
+        const languageMap: Record<string, string> = {
+            'js': 'javascript',
+            'jsx': 'javascript',
+            'ts': 'typescript',
+            'tsx': 'typescript',
+            'py': 'python',
+            'rb': 'ruby',
+            'sh': 'bash',
+            'shell': 'bash',
+            'yml': 'yaml',
+        };
+
+        return languageMap[lang.toLowerCase()] || lang.toLowerCase();
+    };
+
+    const highlighterLanguage = getSyntaxHighlighterLanguage(language);
+    const HighlighterComponent = Platform.OS === 'web' ? WebSyntaxHighlighter : NativeSyntaxHighlighter;
+    const styles = Platform.OS === 'web' ? webStyles : nativeStyles;
+
     return (
         <VStack className="my-4">
             {language && (
@@ -89,7 +154,41 @@ export function CodeBlock({ children, className }: CodeBlockProps) {
             <Box className={`bg-background-tertiary border border-border-primary p-4 ${
                 language ? 'rounded-b-lg' : 'rounded-lg'
             }`}>
-                <Text className="font-mono text-sm text-text-primary">{children}</Text>
+                {Platform.OS === 'web' && HighlighterComponent && styles ? (
+                    <HighlighterComponent
+                        language={highlighterLanguage}
+                        style={colorScheme === 'dark' ? styles.atomOneDark : styles.atomOneLight}
+                        customStyle={{
+                            margin: 0,
+                            padding: 0,
+                            backgroundColor: 'transparent',
+                            fontSize: 14,
+                            lineHeight: 1.5,
+                            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                        }}
+                        wrapLongLines={true}
+                        showLineNumbers={children.split('\n').length > 10}
+                        lineNumberStyle={{
+                            color: 'var(--text-text-tertiary)',
+                            paddingRight: '16px',
+                            fontSize: '12px',
+                        }}
+                    >
+                        {children}
+                    </HighlighterComponent>
+                ) : Platform.OS !== 'web' && HighlighterComponent && nativeStyles ? (
+                    <HighlighterComponent
+                        language={highlighterLanguage}
+                        style={nativeStyles.docco} // Use safe style for React Native
+                        fontSize={14}
+                        highlighter="highlightjs"
+                        fontFamily="monospace"
+                    >
+                        {children}
+                    </HighlighterComponent>
+                ) : (
+                    <Text className="font-mono text-sm text-text-primary">{children}</Text>
+                )}
             </Box>
         </VStack>
     );

@@ -1,0 +1,8 @@
+scan:
+  skip-files:
+    - "**/*.tfstate"
+    - "**/*.tfstate.backup"
+    - "**/.terraform/**"
+    - "**/terraform.tfstate.d/**"
+    - "ops/k3s/terraform.tfstate" # local terraform state for development
+    - "ops/k3s/terraform.tfstate.backup" # local terraform state backup for development

@@ -4,18 +4,44 @@ const fs = require('fs');
 const path = require('path');
 
 const DOCS_DIR = path.join(__dirname, '../assets/docs');
-const OUTPUT_FILE = path.join(__dirname, '../src/docs-registry.generated.ts');
+const REGISTRY_OUTPUT_FILE = path.join(__dirname, '../components/docs/constants/docRegistry.generated.ts');
+const CATEGORIES_OUTPUT_FILE = path.join(__dirname, '../components/docs/constants/docCategories.generated.ts');
 
-function scanDirectory(dir, baseDir = dir) {
+// Default category metadata - can be overridden by specific folder structure
+const DEFAULT_CATEGORY_CONFIG = {
+    'general': { icon: '📚', name: 'General', order: 0 },
+    'about': { icon: '📋', name: 'About', order: 10 },
+    'workflows': { icon: '⚡', name: 'Workflows', order: 20 },
+    'credits': { icon: '👥', name: 'Credits', order: 30 },
+    'policies': { icon: '⚖️', name: 'Policies & Ethics', order: 40 },
+    'design': { icon: '🎨', name: 'Design System', order: 50 },
+    'technical': { icon: '🔧', name: 'Technical Docs', order: 60 },
+    'api': { icon: '🔌', name: 'API Reference', order: 70 },
+};
+
+function scanDirectoryStructure(dir, baseDir = dir, currentPath = '') {
+    const categories = new Set();
     const items = [];
+
+    if (!fs.existsSync(dir)) {
+        return { categories, items };
+    }
+
     const entries = fs.readdirSync(dir, { withFileTypes: true });
 
     for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
         const relativePath = path.relative(baseDir, fullPath);
+        const entryPath = currentPath ? `${currentPath}/${entry.name}` : entry.name;
 
         if (entry.isDirectory()) {
-            items.push(...scanDirectory(fullPath, baseDir));
+            // Add this directory as a category
+            categories.add(entryPath);
+
+            // Recursively scan subdirectory
+            const subResult = scanDirectoryStructure(fullPath, baseDir, entryPath);
+            subResult.categories.forEach(cat => categories.add(cat));
+            items.push(...subResult.items);
         } else if (entry.isFile() && entry.name.endsWith('.md')) {
             const slug = relativePath
                 .replace(/\.md$/, '')
@@ -23,35 +49,103 @@ function scanDirectory(dir, baseDir = dir) {
                 .replace(/\/index$/, '') // Convert 'workflows/index' to 'workflows'
                 .replace(/^index$/, 'home'); // Convert root 'index' to 'home'
 
-            // Create a category from the folder structure
+            // Determine category from path structure
             const pathParts = relativePath.split(/[\/\\]/);
-            const category = pathParts.length > 1 ? pathParts[0] : 'general';
+            let category;
+
+            if (pathParts.length > 1) {
+                // Use the top-level folder as category
+                category = pathParts[0];
+            } else {
+                // Root-level files go to 'general'
+                category = 'general';
+            }
+
+            // Also track nested categories for more complex structures
+            const nestedCategory = currentPath || category;
+
+            categories.add(category);
+            if (nestedCategory !== category) {
+                categories.add(nestedCategory);
+            }
 
             items.push({
                 slug,
                 filePath: relativePath.replace(/\\/g, '/'),
                 category,
-                requirePath: `../assets/docs/${relativePath.replace(/\\/g, '/')}`
+                nestedCategory: nestedCategory !== category ? nestedCategory : undefined,
+                requirePath: `@/assets/docs/${relativePath.replace(/\\/g, '/')}`
             });
         }
     }
 
-    return items;
+    return { categories, items };
 }
 
-function generateRegistry() {
-    if (!fs.existsSync(DOCS_DIR)) {
-        console.warn('Docs directory not found, creating empty registry');
-        const emptyRegistry = `// Auto-generated docs registry
-export const docsModules = {};
-export const docsMetadata = [];
+function generateCategoryConfig(categories) {
+    const categoryArray = Array.from(categories).filter(cat => cat !== 'general');
+
+    // Always include 'general' at the beginning
+    const allCategories = ['general', ...categoryArray.sort()];
+
+    const categoryIcons = {};
+    const categoryNames = {};
+
+    allCategories.forEach(cat => {
+        const config = DEFAULT_CATEGORY_CONFIG[cat];
+        if (config) {
+            categoryIcons[cat] = config.icon;
+            categoryNames[cat] = config.name;
+        } else {
+            // Generate default icon and name for new categories
+            categoryIcons[cat] = '📄';
+            categoryNames[cat] = cat.split('/').pop()
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+    });
+
+    return {
+        order: allCategories,
+        icons: categoryIcons,
+        names: categoryNames
+    };
+}
+
+function generateCategoriesFile(categoryConfig) {
+    const orderArray = categoryConfig.order.map(cat => `'${cat}'`).join(', ');
+
+    const iconsEntries = Object.entries(categoryConfig.icons)
+        .map(([key, value]) => `    '${key}': '${value}'`)
+        .join(',\n');
+
+    const namesEntries = Object.entries(categoryConfig.names)
+        .map(([key, value]) => `    '${key}': '${value}'`)
+        .join(',\n');
+
+    const categoriesContent = `// Auto-generated category configuration
+// This file is generated by scripts/generate-docs-registry.js during prebuild
+
+export const CATEGORY_ORDER = [${orderArray}] as const;
+
+export const CATEGORY_ICONS: Record<string, string> = {
+${iconsEntries}
+} as const;
+
+export const CATEGORY_NAMES: Record<string, string> = {
+${namesEntries}
+} as const;
+
+export const PREFERRED_DEFAULT_DOCS = ['home', 'index', 'getting-started', 'ethics'] as const;
+
+export type DocCategory = typeof CATEGORY_ORDER[number];
 `;
-        fs.writeFileSync(OUTPUT_FILE, emptyRegistry);
-        return;
-    }
 
-    const docs = scanDirectory(DOCS_DIR);
+    return categoriesContent;
+}
 
+function generateRegistryFile(docs) {
     // Generate TypeScript imports and registry
     const imports = docs.map(doc =>
         `import ${doc.slug.replace(/[^a-zA-Z0-9]/g, '_')} from '${doc.requirePath}';`
@@ -61,14 +155,22 @@ export const docsMetadata = [];
         `  '${doc.slug}': ${doc.slug.replace(/[^a-zA-Z0-9]/g, '_')}`
     ).join(',\n');
 
-    const metadataEntries = docs.map(doc => `  {
-    slug: '${doc.slug}',
+    const metadataEntries = docs.map(doc => {
+        const base = `    slug: '${doc.slug}',
     filePath: '${doc.filePath}',
-    category: '${doc.category}'
-  }`).join(',\n');
+    category: '${doc.category}'`;
+
+        const nested = doc.nestedCategory ? `,
+    nestedCategory: '${doc.nestedCategory}'` : '';
+
+        return `  {\n${base}${nested}\n  }`;
+    }).join(',\n');
 
     const registryContent = `// Auto-generated docs registry
 // This file is generated by scripts/generate-docs-registry.js during prebuild
+// Categories are defined in ../components/docs/constants/docCategories.generated.ts
+
+import type { DocCategory } from '@/components/docs/constants/docCategories.generated';
 
 ${imports}
 
@@ -83,25 +185,78 @@ ${metadataEntries}
 export type DocMetadata = {
   slug: string;
   filePath: string;
-  category: string;
+  category: DocCategory;
+  nestedCategory?: string;
 };
 `;
 
-    // Ensure src directory exists
-    const srcDir = path.dirname(OUTPUT_FILE);
-    if (!fs.existsSync(srcDir)) {
-        fs.mkdirSync(srcDir, { recursive: true });
+    return registryContent;
+}
+
+function generateRegistry() {
+    if (!fs.existsSync(DOCS_DIR)) {
+        console.warn('Docs directory not found, creating empty registry');
+
+        const emptyRegistry = `// Auto-generated docs registry
+export const docsModules = {};
+export const docsMetadata = [];
+`;
+
+        const emptyCategories = `// Auto-generated category configuration
+export const CATEGORY_ORDER = ['general'] as const;
+export const CATEGORY_ICONS = { 'general': '📚' } as const;
+export const CATEGORY_NAMES = { 'general': 'General' } as const;
+export const PREFERRED_DEFAULT_DOCS = ['home'] as const;
+`;
+
+        // Ensure directories exist
+        [REGISTRY_OUTPUT_FILE, CATEGORIES_OUTPUT_FILE].forEach(file => {
+            const dir = path.dirname(file);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+        });
+
+        fs.writeFileSync(REGISTRY_OUTPUT_FILE, emptyRegistry);
+        fs.writeFileSync(CATEGORIES_OUTPUT_FILE, emptyCategories);
+        return;
     }
 
-    fs.writeFileSync(OUTPUT_FILE, registryContent);
+    const { categories, items: docs } = scanDirectoryStructure(DOCS_DIR);
+    const categoryConfig = generateCategoryConfig(categories);
+
+    // Generate both files
+    const registryContent = generateRegistryFile(docs);
+    const categoriesContent = generateCategoriesFile(categoryConfig);
+
+    // Ensure directories exist
+    [REGISTRY_OUTPUT_FILE, CATEGORIES_OUTPUT_FILE].forEach(file => {
+        const dir = path.dirname(file);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+    });
+
+    fs.writeFileSync(REGISTRY_OUTPUT_FILE, registryContent);
+    fs.writeFileSync(CATEGORIES_OUTPUT_FILE, categoriesContent);
+
     console.log(`Generated docs registry with ${docs.length} documents:`);
-    docs.forEach(doc => console.log(`  - ${doc.slug} (${doc.category})`));
+    docs.forEach(doc => {
+        const nested = doc.nestedCategory ? ` -> ${doc.nestedCategory}` : '';
+        console.log(`  - ${doc.slug} (${doc.category}${nested})`);
+    });
+
+    console.log(`\nGenerated categories: ${Array.from(categories).join(', ')}`);
 }
 
-// Create src directory if it doesn't exist
+// Create directories if they don't exist
 const srcDir = path.join(__dirname, '../src');
-if (!fs.existsSync(srcDir)) {
-    fs.mkdirSync(srcDir, { recursive: true });
-}
+const constantsDir = path.join(__dirname, '../components/docs/constants');
+
+[srcDir, constantsDir].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+});
 
 generateRegistry();

@@ -9,8 +9,9 @@ module "contour" {
 }
 
 module "bootstrap" {
-  source      = "./modules/bootstrap"
-  environment = var.environment
+  source           = "./modules/bootstrap"
+  environment      = var.environment
+  dockerconfigjson = var.dockerconfigjson
 }
 
 module "cert-manager" {

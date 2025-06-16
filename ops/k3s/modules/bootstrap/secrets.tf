@@ -5,7 +5,7 @@ resource "kubernetes_secret_v1" "ghcr" {
   }
 
   data = {
-    ".dockerconfigjson" = "{\"auths\":{\"https://ghcr.io\":{\"username\":\"siennathesane\",\"password\":\"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\",\"auth\":\"c2llbm5hdGhlc2FuZTpnaHBfUWtjYkR2UFdWd1pXZFNheFRINzhZamdjeE5hdDBrNEVpZXUw\"}}}"
+    ".dockerconfigjson" = "${var.dockerconfigjson}"
   }
 
   type = "kubernetes.io/dockerconfigjson"

@@ -1,6 +1,6 @@
 // Navigation tree builder
 import {NavigationItem} from "@/components/docs/types";
-import {CATEGORY_ICONS, CATEGORY_NAMES, CATEGORY_ORDER} from "@/components/docs/constants/docCategories";
+import {CATEGORY_ICONS, CATEGORY_NAMES, CATEGORY_ORDER} from "@/components/docs/constants/docCategories.generated";
 
 export function buildNavigationTree(docs: any, categories: string[]): NavigationItem[] {
     const sortedCategories = [...categories].sort((a, b) => {

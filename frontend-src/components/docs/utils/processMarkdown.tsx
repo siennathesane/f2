@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import {CodeBlock} from "@/components/docs/components/Codeblock/codeblock";
+import { CodeBlock } from "@/components/docs/components/Codeblock/codeblock";
+import { Bibtex } from "@/components/docs/components/Bibtex";
 
 export function processMarkdownCodeBlocks(content: string): React.ReactElement[] {
     const parts = content.split(/(```[\s\S]*?```)/g);
@@ -14,14 +15,27 @@ export function processMarkdownCodeBlocks(content: string): React.ReactElement[]
             const language = firstLine || 'text';
             const code = lines.slice(1, -1).join('\n');
 
-            elements.push(
-                <CodeBlock
-                    key={`code-${index}`}
-                    className={`language-${language}`}
-                >
-                    {code}
-                </CodeBlock>
-            );
+            // Check if this is a bibtex block
+            if (language === 'bibtex') {
+                elements.push(
+                    <Bibtex
+                        key={`bibtex-${index}`}
+                        className={`language-${language}`}
+                    >
+                        {code}
+                    </Bibtex>
+                );
+            } else {
+                // Use the regular CodeBlock for all other languages
+                elements.push(
+                    <CodeBlock
+                        key={`code-${index}`}
+                        className={`language-${language}`}
+                    >
+                        {code}
+                    </CodeBlock>
+                );
+            }
         } else if (part.trim()) {
             // This is regular markdown - we'll still use the markdown renderer for this part
             elements.push(

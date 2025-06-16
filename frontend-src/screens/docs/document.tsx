@@ -182,11 +182,31 @@ export default function DocumentScreen() {
                             content={currentDoc.content}
                             markdownStyles={markdownStyles}
                             onLinkPress={(url) => {
+                                // Handle docs links that already have /docs/ prefix
                                 if (url.startsWith('/docs/')) {
                                     const targetSlug = url.replace('/docs/', '');
                                     handleNavigate(targetSlug);
                                     return false;
                                 }
+
+                                // Handle relative links that should be docs links
+                                // Check if the URL is a relative path that matches a known doc slug
+                                const cleanUrl = url.replace(/^\.\//, ''); // Remove ./ prefix if present
+
+                                if (docs[cleanUrl]) {
+                                    // This is a known document slug, navigate to it
+                                    handleNavigate(cleanUrl);
+                                    return false;
+                                }
+
+                                // Check if it's a relative path without extension that might be a doc
+                                if (!url.startsWith('http') && !url.startsWith('/') && !url.includes('.')) {
+                                    // Might be a relative doc link, try navigating to it as a doc
+                                    handleNavigate(cleanUrl);
+                                    return false;
+                                }
+
+                                // For external links or other URLs, allow default behavior
                                 return true;
                             }}
                         />
