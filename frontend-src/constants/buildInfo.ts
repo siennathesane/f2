@@ -1,7 +1,7 @@
 // Auto-generated build info - do not edit manually
 export const BUILD_INFO = {
-  gitCommit: '847af1a',
+  gitCommit: '4b2e73b',
   gitBranch: 'mainline',
-  buildTimestamp: '2025-06-16 at 17:04',
-  buildId: '847af1a on 2025-06-16 at 17:04'
+  buildTimestamp: '2025-06-17 at 18:15',
+  buildId: '4b2e73b on 2025-06-17 at 18:15'
 } as const;

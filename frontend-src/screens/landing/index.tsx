@@ -22,13 +22,13 @@ export const LandingScreen = () => {
                             <VStack className="space-y-6 items-center max-w-4xl">
                                 <Text
                                     className="text-4xl md:text-6xl font-bold font-mono text-center text-typography-900 leading-tight">
-                                    f*ck the facists
+                                    Palantir for the People
                                 </Text>
 
                                 <Text
                                     className="text-lg md:text-xl text-center text-typography-600 max-w-3xl leading-relaxed">
                                     The same class of intelligence tools that billion-dollar companies use, now being
-                                    built by the people, for the people.
+                                    built by us, for us.
                                 </Text>
 
                                 <Box className="bg-yellow-200 border-2 border-yellow-400 px-8 py-4 rounded-lg mt-8">

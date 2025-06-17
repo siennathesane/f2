@@ -1,6 +1,6 @@
 # f2
 
-#### __f*ck the fascists.__
+#### Because freedom dies in the dark.
 
 ## Contributing
 
