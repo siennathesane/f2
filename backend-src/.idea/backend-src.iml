@@ -7,6 +7,8 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/auth-svc/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/cargo-docker/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/utils/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/workflow-core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/workflow-core/examples" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

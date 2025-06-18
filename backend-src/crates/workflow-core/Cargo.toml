@@ -1,0 +1,42 @@
+[package]
+name = "workflow-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Async runtime and traits
+tokio = { version = "1.0", features = ["full"] }
+tokio-util = "0.7"
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Database (for persistence layer)
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "json", "migrate"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Utilities
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# gRPC (for API layer)
+tonic = "0.10"
+prost = "0.12"
+
+# Logging and tracing
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# Additional utilities
+futures = "0.3"
+parking_lot = "0.12"
+dashmap = "5.0"
+
+# Build dependencies
+[build-dependencies]
+tonic-build = "0.10"
