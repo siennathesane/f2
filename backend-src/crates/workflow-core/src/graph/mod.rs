@@ -2,12 +2,11 @@ use thiserror::Error;
 
 mod core;
 mod edge_ctx;
-pub mod types;
 mod executor;
 pub mod macros;
+pub mod types;
 
-#[derive(Error, Debug)]
-#[derive(Clone)]
+#[derive(Error, Debug, Clone)]
 pub enum Error {
     #[error("Invalid input: {0}")]
     InvalidInput(String),

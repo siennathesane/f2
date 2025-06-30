@@ -60,14 +60,6 @@ impl Workflow {
             .exec_async(&mut conn)
             .await
         {
-            Ok(_) => {}
-            Err(e) => return Err(RedisError(e.to_string())),
-        };
-        match redis::cmd("DEL")
-            .arg(self.execution_key(execution_id))
-            .exec_async(&mut conn)
-            .await
-        {
             Ok(_) => Ok(()),
             Err(e) => Err(RedisError(e.to_string())),
         }
@@ -135,18 +127,16 @@ impl Workflow {
         let total_nodes = self.clone().graph.node_count();
         let mut completed_count = 0;
 
-        // Process initial ready nodes and handle results
         loop {
             tokio::select! {
-                // Handle ready nodes
+                // handle ready nodes
                 Some(ready_node_idx) = ready_rx.recv() => {
-                    // Get the node and prepare data for the spawned task
                     let node = clone_box(&*self.clone().graph[ready_node_idx]);
                     let result_tx = result_tx.clone();
                     let workflow_id = self.clone().id;
                     let workflow = Arc::clone(&self);
 
-                    // Spawn individual node execution task
+                    // spawn individual node execution task
                     tokio::spawn(async move {
                         let start_time = chrono::Utc::now().timestamp_millis();
 
@@ -171,8 +161,6 @@ impl Workflow {
                                     completed_at: Some(chrono::Utc::now().timestamp_millis()),
                                     error_message: None,
                                 };
-
-                                // Store the result
                                 workflow.store_node_result(workflow_id, node.id(), execution_result).await.unwrap();
                                 result_tx.send((ready_node_idx, Ok(()), ctx)).unwrap()
                             },
@@ -194,9 +182,8 @@ impl Workflow {
                     });
                 }
 
-                // Handle execution results
+                // handle execution results
                 Some((completed_idx, result, _output_params)) = result_rx.recv() => {
-                    // Update node state
                     let node_state = match result {
                         Ok(_) => NodeState::Completed(Ok(())),
                         Err(e) => NodeState::Completed(Err(e)),
@@ -206,13 +193,52 @@ impl Workflow {
                     completed_nodes.lock().unwrap().insert(completed_idx);
                     completed_count += 1;
 
-                    // Check dependent nodes
-                    for edge_ref in self.clone().graph.edges_directed(completed_idx, petgraph::Outgoing) {
+                    // check dependent nodes
+                    for edge_ref in self.graph.edges_directed(completed_idx, petgraph::Outgoing) {
                         let target_idx = edge_ref.target();
+                        let edge = edge_ref.weight();
 
-                        // For now, simple dependency check (you'll implement proper dependency logic later)
+                        // only check nodes that are currently waiting
                         let current_state = node_states.lock().unwrap().get(&target_idx).cloned();
-                        if matches!(current_state, Some(NodeState::Waiting)) {
+                        if !matches!(current_state, Some(NodeState::Waiting)) {
+                            continue; // Skip if not waiting
+                        }
+
+                        // check if all incoming dependencies are satisfied
+                        let mut all_dependencies_met = true;
+
+                        for incoming_edge_ref in self.graph.edges_directed(target_idx, petgraph::Incoming) {
+                            let source_idx = incoming_edge_ref.source();
+                            let incoming_edge = incoming_edge_ref.weight();
+
+                            // has the source node completed?
+                            let source_state = node_states.lock().unwrap().get(&source_idx).cloned();
+
+                            match source_state {
+                                Some(NodeState::Completed(Ok(()))) => {
+                                    // source succeeded
+                                    if !matches!(incoming_edge.condition(), Condition::OnSuccess) {
+                                        all_dependencies_met = false;
+                                        break;
+                                    }
+                                }
+                                Some(NodeState::Completed(Err(_))) => {
+                                    // source failed
+                                    if !matches!(incoming_edge.condition(), Condition::OnFailure | Condition::RetryableFailure) {
+                                        all_dependencies_met = false;
+                                        break;
+                                    }
+                                }
+                                _ => {
+                                    // source hasn't completed yet
+                                    all_dependencies_met = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // only mark as ready if all dependencies are satisfied
+                        if all_dependencies_met {
                             node_states.lock().unwrap().insert(target_idx, NodeState::Ready);
                             ready_tx.send(target_idx).unwrap();
                         }
@@ -225,8 +251,7 @@ impl Workflow {
                 }
             }
         }
-
-        // Update final execution state
+        
         let mut final_execution_state = self.clone().get_execution_state(execution_id).await?;
         final_execution_state.status = ExecutionStatus::Completed;
         final_execution_state.completed_at = Some(chrono::Utc::now().timestamp_millis());
@@ -305,7 +330,6 @@ impl Workflow {
         execution_id: Uuid,
         node_idx: NodeIndex,
     ) -> Result<BTreeMap<String, ParameterType>, Error> {
-        // For top-level nodes, return initial params
         let has_incoming = self
             .clone()
             .graph
@@ -314,6 +338,7 @@ impl Workflow {
             > 0;
 
         if !has_incoming {
+            // top-level node, return initial parameters
             let execution = self.clone().get_execution_state(execution_id).await?;
             Ok(execution.input_params)
         } else {

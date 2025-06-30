@@ -1,6 +1,6 @@
-use crate::graph::types::{ExecutionState, ExecutionStatus, ParameterType, WorkflowDefinition};
 use crate::graph::Error;
 use crate::graph::Error::RedisError;
+use crate::graph::types::{ExecutionState, ExecutionStatus, ParameterType, WorkflowDefinition};
 use redis::Client;
 use std::collections::BTreeMap;
 use uuid::Uuid;
@@ -63,7 +63,7 @@ impl WorkflowExecutor {
             Err(e) => Err(RedisError(e.to_string())),
         }
     }
-    
+
     pub async fn save_execution_state(&self, state: &ExecutionState) -> Result<(), Error> {
         let mut conn = match self.client.get_multiplexed_async_connection().await {
             Ok(v) => v,
@@ -87,7 +87,7 @@ impl WorkflowExecutor {
     ) -> Result<Uuid, Error> {
         let workflow = self.load_workflow(workflow_id).await?;
         let execution_id = Uuid::new_v4();
-        
+
         let execution_state = ExecutionState {
             id: execution_id,
             workflow_id: workflow.id,
@@ -97,9 +97,9 @@ impl WorkflowExecutor {
             completed_at: None,
             error_message: None,
         };
-        
+
         self.save_execution_state(&execution_state).await?;
-        
+
         let mut conn = match self.client.get_multiplexed_async_connection().await {
             Ok(v) => v,
             Err(e) => return Err(RedisError(e.to_string())),
@@ -110,12 +110,12 @@ impl WorkflowExecutor {
             .exec_async(&mut conn)
             .await
         {
-            Ok(_) => { },
+            Ok(_) => {}
             Err(e) => return Err(RedisError(e.to_string())),
         };
-        
+
         // TODO(@siennathesane): implement the graph execution
-        
+
         Ok(execution_id)
     }
 }

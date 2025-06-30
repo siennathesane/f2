@@ -82,7 +82,7 @@ pub trait EdgeContext: Send + Sync {
 pub trait Node: DynClone + Send + Sync {
     /// Returns the unique identifier of the node.
     fn id(&self) -> Uuid;
-    
+
     /// Returns the index of the node in the graph.
     fn idx(&self) -> NodeIndex;
 
