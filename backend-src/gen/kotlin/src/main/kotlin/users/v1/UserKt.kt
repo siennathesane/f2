@@ -46,20 +46,20 @@ public object UserKt {
     }
 
     /**
-     * `string name = 2 [json_name = "name"];`
+     * `string handle = 2 [json_name = "handle"];`
      */
-    public var name: kotlin.String
-      @JvmName("getName")
-      get() = _builder.name
-      @JvmName("setName")
+    public var handle: kotlin.String
+      @JvmName("getHandle")
+      get() = _builder.handle
+      @JvmName("setHandle")
       set(value) {
-        _builder.name = value
+        _builder.handle = value
       }
     /**
-     * `string name = 2 [json_name = "name"];`
+     * `string handle = 2 [json_name = "handle"];`
      */
-    public fun clearName() {
-      _builder.clearName()
+    public fun clearHandle() {
+      _builder.clearHandle()
     }
 
     /**

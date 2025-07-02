@@ -22,16 +22,16 @@ public interface UserOrBuilder extends
       getIdBytes();
 
   /**
-   * <code>string name = 2 [json_name = "name"];</code>
-   * @return The name.
+   * <code>string handle = 2 [json_name = "handle"];</code>
+   * @return The handle.
    */
-  java.lang.String getName();
+  java.lang.String getHandle();
   /**
-   * <code>string name = 2 [json_name = "name"];</code>
-   * @return The bytes for name.
+   * <code>string handle = 2 [json_name = "handle"];</code>
+   * @return The bytes for handle.
    */
   com.google.protobuf.ByteString
-      getNameBytes();
+      getHandleBytes();
 
   /**
    * <code>string email = 3 [json_name = "email"];</code>

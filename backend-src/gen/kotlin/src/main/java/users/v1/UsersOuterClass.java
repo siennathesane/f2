@@ -50,16 +50,16 @@ public final class UsersOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\027f2/users/v1/users.proto\022\013f2.users.v1\032\031" +
-      "f2/errors/v1/errors.proto\"@\n\004User\022\016\n\002id\030" +
-      "\001 \001(\tR\002id\022\022\n\004name\030\002 \001(\tR\004name\022\024\n\005email\030\003" +
-      " \001(\tR\005email\":\n\021CreateUserRequest\022%\n\004user" +
-      "\030\001 \001(\0132\021.f2.users.v1.UserR\004user\"f\n\022Creat" +
-      "eUserResponse\022%\n\004user\030\001 \001(\0132\021.f2.users.v" +
-      "1.UserR\004user\022)\n\005error\030\002 \001(\0132\023.f2.errors." +
-      "v1.ErrorR\005error2V\n\005Users\022M\n\nCreateUser\022\036" +
-      ".f2.users.v1.CreateUserRequest\032\037.f2.user" +
-      "s.v1.CreateUserResponseB\014\n\010users.v1P\001b\006p" +
-      "roto3"
+      "f2/errors/v1/errors.proto\"D\n\004User\022\016\n\002id\030" +
+      "\001 \001(\tR\002id\022\026\n\006handle\030\002 \001(\tR\006handle\022\024\n\005ema" +
+      "il\030\003 \001(\tR\005email\":\n\021CreateUserRequest\022%\n\004" +
+      "user\030\001 \001(\0132\021.f2.users.v1.UserR\004user\"f\n\022C" +
+      "reateUserResponse\022%\n\004user\030\001 \001(\0132\021.f2.use" +
+      "rs.v1.UserR\004user\022)\n\005error\030\002 \001(\0132\023.f2.err" +
+      "ors.v1.ErrorR\005error2V\n\005Users\022M\n\nCreateUs" +
+      "er\022\036.f2.users.v1.CreateUserRequest\032\037.f2." +
+      "users.v1.CreateUserResponseB\014\n\010users.v1P" +
+      "\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -71,7 +71,7 @@ public final class UsersOuterClass {
     internal_static_f2_users_v1_User_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_f2_users_v1_User_descriptor,
-        new java.lang.String[] { "Id", "Name", "Email", });
+        new java.lang.String[] { "Id", "Handle", "Email", });
     internal_static_f2_users_v1_CreateUserRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_f2_users_v1_CreateUserRequest_fieldAccessorTable = new

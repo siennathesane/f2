@@ -27,7 +27,7 @@ public struct F2_Users_V1_User: Sendable {
 
   public var id: String = String()
 
-  public var name: String = String()
+  public var handle: String = String()
 
   public var email: String = String()
 
@@ -96,7 +96,7 @@ extension F2_Users_V1_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
   public static let protoMessageName: String = _protobuf_package + ".User"
   public static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "id"),
-    2: .same(proto: "name"),
+    2: .same(proto: "handle"),
     3: .same(proto: "email"),
   ]
 
@@ -107,7 +107,7 @@ extension F2_Users_V1_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.handle) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.email) }()
       default: break
       }
@@ -118,8 +118,8 @@ extension F2_Users_V1_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     if !self.id.isEmpty {
       try visitor.visitSingularStringField(value: self.id, fieldNumber: 1)
     }
-    if !self.name.isEmpty {
-      try visitor.visitSingularStringField(value: self.name, fieldNumber: 2)
+    if !self.handle.isEmpty {
+      try visitor.visitSingularStringField(value: self.handle, fieldNumber: 2)
     }
     if !self.email.isEmpty {
       try visitor.visitSingularStringField(value: self.email, fieldNumber: 3)
@@ -129,7 +129,7 @@ extension F2_Users_V1_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
 
   public static func ==(lhs: F2_Users_V1_User, rhs: F2_Users_V1_User) -> Bool {
     if lhs.id != rhs.id {return false}
-    if lhs.name != rhs.name {return false}
+    if lhs.handle != rhs.handle {return false}
     if lhs.email != rhs.email {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

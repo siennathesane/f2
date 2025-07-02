@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package f2.workflows.v1;
+import "google/protobuf/struct.proto";
+
+option java_multiple_files = true;
+option java_package = "workflows.v1";
+
+service Workflows {
+  rpc ListWorkflows(ListWorkflowRequest) returns (ListWorkflowResponse);
+  rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (ExecuteWorkflowResponse);
+}
+
+message ListWorkflowRequest {}
+
+message ListWorkflowResponse {
+  repeated WorkflowDefinition workflows = 1;
+}
+
+message ExecuteWorkflowRequest {
+  // The unique identifier for the workflow to execute.
+  string workflow_id = 1; // Uuid is represented as a string.
+
+  // The input parameters for the workflow execution.
+  map<string, ParameterValue> input_params = 2;
+}
+
+message ExecuteWorkflowResponse {
+  // The unique identifier for the execution.
+  string execution_id = 1; // Uuid is represented as a string.
+
+  // The initial state of the execution.
+  ExecutionState state = 2;
+}
+
+message WorkflowDefinition {
+  string id = 1;
+  string name = 2;
+  google.protobuf.Value graph = 3;
+  int64 created_at = 4;
+}
+
+// Represents the possible statuses of a workflow execution.
+enum ExecutionStatus {
+  // The default status, should not be used.
+  EXECUTION_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  RUNNING = 2;
+  COMPLETED = 3;
+  FAILED = 4;
+  SKIPPED = 5;
+}
+
+// Represents the state of a single workflow execution.
+message ExecutionState {
+  // The unique identifier for the execution.
+  string id = 1; // Uuid is represented as a string.
+
+  // The unique identifier for the workflow being executed.
+  string workflow_id = 2; // Uuid is represented as a string.
+
+  // The current status of the execution.
+  ExecutionStatus status = 3;
+
+  // The input parameters for the execution.
+  map<string, ParameterValue> input_params = 4;
+
+  // The unix timestamp when the execution started.
+  int64 started_at = 5;
+
+  // The unix timestamp when the execution completed.
+  int64 completed_at = 6;
+
+  // An optional error message if the execution failed.
+  optional string error_message = 7;
+}
+
+
+message ParameterValue {
+  oneof value {
+    string string_value = 1;
+    double number_value = 2;
+    bool bool_value = 3;
+    ParameterObject object_value = 4;
+    ParameterArray array_value = 5;
+  }
+}
+
+message ParameterObject {
+  map<string, ParameterValue> fields = 1;
+}
+
+message ParameterArray {
+  repeated ParameterValue elements = 1;
+}
