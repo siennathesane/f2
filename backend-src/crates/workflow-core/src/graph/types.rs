@@ -1,8 +1,8 @@
 use crate::graph::Error;
 use async_trait::async_trait;
-use dyn_clone::DynClone;
-use petgraph::graph::{EdgeIndex, NodeIndex};
+use redis::{FromRedisValue, ToRedisArgs};
 use redis_macros::{FromRedisValue, ToRedisArgs};
+use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::Debug;
@@ -63,6 +63,8 @@ pub struct NodeExecutionResult {
     pub error_message: Option<String>,
 }
 
+pub type Parameters = BTreeMap<String, ParameterType>;
+
 #[derive(Debug, Clone, Serialize, Deserialize, FromRedisValue, ToRedisArgs)]
 pub enum ParameterType {
     String(String),
@@ -79,38 +81,36 @@ pub trait EdgeContext: Send + Sync {
 }
 
 #[async_trait]
-pub trait Node: DynClone + Send + Sync {
+pub trait Node:
+    Debug + Default + Send + Sync
+{
     /// Returns the unique identifier of the node.
     fn id(&self) -> Uuid;
 
-    /// Returns the index of the node in the graph.
-    fn idx(&self) -> NodeIndex;
-
     /// Returns the name of the node.
-    fn name(&self) -> &str;
+    fn name(&self) -> String;
 
     /// Returns a description of the node.
-    fn description(&self) -> Option<&str>;
+    fn description(&self) -> Option<String>;
 
     /// Returns whether the node is in a valid state.
     fn is_ok(&self) -> bool;
 
     /// Executes the node's logic and returns the updated context.
-    async fn execute(&self, context: &Box<dyn EdgeContext>) -> Result<Box<dyn EdgeContext>, Error>;
+    async fn execute(&self, context: Parameters) -> Result<Parameters, Error>;
 }
 
-pub trait Edge: Send + Sync + Debug {
+pub trait Edge:
+    Debug + Default + Send + Sync
+{
     /// Returns the unique identifier of the edge.
     fn id(&self) -> Uuid;
 
-    /// Returns the index of the edge in the graph.
-    fn idx(&self) -> EdgeIndex;
-
     /// Returns the source node's identifier.
-    fn source(&self) -> EdgeIndex;
+    fn source(&self) -> Uuid;
 
     /// Returns the target node's identifier.
-    fn target(&self) -> EdgeIndex;
+    fn target(&self) -> Uuid;
 
     /// Returns the condition of the preceding node that must be met for this edge to be followed.
     fn condition(&self) -> Condition;

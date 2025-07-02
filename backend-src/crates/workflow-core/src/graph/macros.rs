@@ -18,8 +18,9 @@
 macro_rules! define_node {
     ($name:ident { $($field:ident: $type:ty),* $(,)? }) => {
         #[derive(
-            Clone,
+            Default,
             Debug,
+            Clone,
             serde::Serialize,
             serde::Deserialize,
             redis_macros::ToRedisArgs,
@@ -27,6 +28,76 @@ macro_rules! define_node {
         )]
         pub struct $name {
             $($field: $type,)*
+            id: Uuid,
+            name: String,
+            description: Option<String>,
+        }
+
+        impl $name {
+            /// Create a new builder for this node type
+            pub fn builder() -> paste::paste!([<$name Builder>]) {
+                paste::paste!([<$name Builder>]::new())
+            }
+        }
+        
+        paste::paste! {
+            #[derive(Default, Debug)]
+            pub struct [<$name Builder>] {
+                $($field: Option<$type>,)*
+                id: Option<Uuid>,
+                name: Option<String>,
+                description: Option<String>,
+            }
+            
+            impl [<$name Builder>] {
+                pub fn new() -> Self {
+                    Self::default()
+                }
+                
+                $(
+                    /// Set the $field field
+                    pub fn $field(mut self, value: $type) -> Self {
+                        self.$field = Some(value);
+                        self
+                    }
+                )*
+                
+                /// Set the name field
+                pub fn name(mut self, value: String) -> Self {
+                    self.name = Some(value);
+                    self
+                }
+
+                /// Set the description field  
+                pub fn description(mut self, value: String) -> Self {
+                    self.description = Some(value);
+                    self
+                }
+                
+                /// Build the final node instance
+                pub fn build(self) -> Result<$name, String> {
+                    Ok($name {
+                        $(
+                            $field: self.$field.ok_or_else(|| format!("Field '{}' is required", stringify!($field)))?,
+                        )*
+                        id: self.id.unwrap_or_else(Uuid::new_v4),
+                        name: self.name.ok_or_else(|| "Field 'name' is required".to_string())?,
+                        description: self.description,
+                    })
+                }
+                
+                /// Build the final node instance, panicking on missing required fields
+                pub fn build_unchecked(self) -> $name {
+                    $name {
+                        $(
+                            $field: self.$field.expect(&format!("Field '{}' is required", stringify!($field))),
+                        )*
+                        id: self.id.unwrap_or_else(Uuid::new_v4),
+                        name: self.name.expect("Field 'name' is required"),
+                        description: self.description,
+                    }
+                }
+            }
         }
 
         // Compile-time assertion to ensure all required traits are implemented
