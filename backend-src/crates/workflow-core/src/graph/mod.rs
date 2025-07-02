@@ -9,6 +9,8 @@ mod core;
 
 #[derive(Error, Debug, Clone)]
 pub enum Error {
+    #[error("Missing required parameter: {0}")]
+    MissingRequiredParameter(String),
     #[error("Node not found: {0}")]
     NodeNotFound(String),
     #[error("Node already exists: {0}")]

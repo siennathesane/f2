@@ -31,6 +31,7 @@ impl Node for ParamsNode {
         &self,
         context: BTreeMap<String, ParameterType>,
     ) -> Result<BTreeMap<String, ParameterType>, Error> {
-        todo!()
+        
+        Ok(self.params.clone())
     }
 }

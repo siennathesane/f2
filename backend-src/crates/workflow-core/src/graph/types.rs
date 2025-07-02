@@ -1,8 +1,7 @@
+use std::cmp::Ordering;
 use crate::graph::Error;
 use async_trait::async_trait;
-use redis::{FromRedisValue, ToRedisArgs};
 use redis_macros::{FromRedisValue, ToRedisArgs};
-use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 use std::fmt::Debug;
@@ -65,13 +64,52 @@ pub struct NodeExecutionResult {
 
 pub type Parameters = BTreeMap<String, ParameterType>;
 
-#[derive(Debug, Clone, Serialize, Deserialize, FromRedisValue, ToRedisArgs)]
+#[derive(
+    Debug,
+    Clone,
+    Serialize,
+    Deserialize,
+    FromRedisValue,
+    ToRedisArgs,
+)]
 pub enum ParameterType {
     String(String),
     Number(f64),
     Boolean(bool),
     Object(HashMap<String, ParameterType>),
     Array(Box<ParameterType>),
+}
+
+impl PartialEq for ParameterType {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (ParameterType::String(a), ParameterType::String(b)) => a == b,
+            (ParameterType::Number(a), ParameterType::Number(b)) => a == b,
+            (ParameterType::Boolean(a), ParameterType::Boolean(b)) => a == b,
+            (ParameterType::Object(a), ParameterType::Object(b)) => a == b,
+            (ParameterType::Array(a), ParameterType::Array(b)) => a == b,
+            _ => false,
+        }
+    }
+}
+
+impl Eq for ParameterType {}
+
+impl PartialOrd for ParameterType {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> { Some(self.cmp(other)) }
+}
+
+impl Ord for ParameterType {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (ParameterType::String(a), ParameterType::String(b)) => a.cmp(b),
+            (ParameterType::Number(a), ParameterType::Number(b)) => a.partial_cmp(b).unwrap_or(Ordering::Equal),
+            (ParameterType::Boolean(a), ParameterType::Boolean(b)) => a.cmp(b),
+            (ParameterType::Object(a), ParameterType::Object(b)) => a.iter().cmp(b),
+            (ParameterType::Array(a), ParameterType::Array(b)) => a.cmp(b),
+            _ => Ordering::Equal,
+        }
+    }
 }
 
 pub trait EdgeContext: Send + Sync {
@@ -81,9 +119,7 @@ pub trait EdgeContext: Send + Sync {
 }
 
 #[async_trait]
-pub trait Node:
-    Debug + Default + Send + Sync
-{
+pub trait Node: Debug + Default + Send + Sync {
     /// Returns the unique identifier of the node.
     fn id(&self) -> Uuid;
 
@@ -100,9 +136,7 @@ pub trait Node:
     async fn execute(&self, context: Parameters) -> Result<Parameters, Error>;
 }
 
-pub trait Edge:
-    Debug + Default + Send + Sync
-{
+pub trait Edge: Debug + Default + Send + Sync {
     /// Returns the unique identifier of the edge.
     fn id(&self) -> Uuid;
 

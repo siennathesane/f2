@@ -21,6 +21,10 @@ macro_rules! define_node {
             Default,
             Debug,
             Clone,
+            Eq,
+            PartialEq,
+            PartialOrd,
+            Ord,
             serde::Serialize,
             serde::Deserialize,
             redis_macros::ToRedisArgs,
@@ -55,33 +59,33 @@ macro_rules! define_node {
                 }
                 
                 $(
-                    /// Set the $field field
-                    pub fn $field(mut self, value: $type) -> Self {
+                    /// Set the [<$field>] field
+                    pub fn [<with_ $field>](mut self, value: $type) -> Self {
                         self.$field = Some(value);
                         self
                     }
                 )*
                 
                 /// Set the name field
-                pub fn name(mut self, value: String) -> Self {
+                pub fn with_name(mut self, value: String) -> Self {
                     self.name = Some(value);
                     self
                 }
 
                 /// Set the description field  
-                pub fn description(mut self, value: String) -> Self {
+                pub fn with_description(mut self, value: String) -> Self {
                     self.description = Some(value);
                     self
                 }
                 
                 /// Build the final node instance
-                pub fn build(self) -> Result<$name, String> {
+                pub fn build(self) -> Result<$name, $crate::graph::Error> {
                     Ok($name {
                         $(
-                            $field: self.$field.ok_or_else(|| format!("Field '{}' is required", stringify!($field)))?,
+                            $field: self.$field.ok_or_else(|| $crate::graph::Error::MissingRequiredParameter(String::from(stringify!($field))))?,
                         )*
                         id: self.id.unwrap_or_else(Uuid::new_v4),
-                        name: self.name.ok_or_else(|| "Field 'name' is required".to_string())?,
+                        name: self.name.unwrap_or_default(),
                         description: self.description,
                     })
                 }
@@ -93,7 +97,7 @@ macro_rules! define_node {
                             $field: self.$field.expect(&format!("Field '{}' is required", stringify!($field))),
                         )*
                         id: self.id.unwrap_or_else(Uuid::new_v4),
-                        name: self.name.expect("Field 'name' is required"),
+                        name: self.name.unwrap_or_default(), // or .unwrap_or_else(String::new)
                         description: self.description,
                     }
                 }
@@ -123,9 +127,6 @@ macro_rules! define_node {
 /// Usage:
 /// ```
 /// define_edge!(MyEdge {
-///     id: Uuid,
-///     source: Uuid,
-///     target: Uuid,
 ///     name: String,
 /// });
 ///
@@ -141,6 +142,11 @@ macro_rules! define_edge {
         #[derive(
             Clone,
             Debug,
+            Default,
+            Eq,
+            PartialEq,
+            PartialOrd,
+            Ord,
             serde::Serialize,
             serde::Deserialize,
             redis_macros::ToRedisArgs,
@@ -148,6 +154,86 @@ macro_rules! define_edge {
         )]
         pub struct $name {
             $($field: $type,)*
+            id: Uuid,
+            source: Uuid,
+            target: Uuid,
+        }
+
+        impl $name {
+            /// Create a new builder for this edge type
+            pub fn builder() -> paste::paste!([<$name Builder>]) {
+                paste::paste!([<$name Builder>]::new())
+            }
+        }
+        
+        // Generate the builder struct using paste
+        paste::paste! {
+            #[derive(Default, Debug)]
+            pub struct [<$name Builder>] {
+                $($field: Option<$type>,)*
+                id: Option<Uuid>,
+                source: Option<Uuid>,
+                target: Option<Uuid>,
+            }
+        }
+        
+        // Generate the impl block separately to avoid paste/repetition conflicts
+        paste::paste! {
+            impl [<$name Builder>] {
+                pub fn new() -> Self {
+                    Self::default()
+                }
+                
+                $(
+                    /// Set the [<$field>] field
+                    pub fn [<with_ $field>](mut self, value: $type) -> Self {
+                        self.$field = Some(value);
+                        self
+                    }
+                )*
+                
+                /// Set the id field
+                pub fn with_id(mut self, value: Uuid) -> Self {
+                    self.id = Some(value);
+                    self
+                }
+
+                /// Set the source field
+                pub fn with_source(mut self, value: Uuid) -> Self {
+                    self.source = Some(value);
+                    self
+                }
+
+                /// Set the target field
+                pub fn with_target(mut self, value: Uuid) -> Self {
+                    self.target = Some(value);
+                    self
+                }
+                
+                /// Build the final edge instance
+                pub fn build(self) -> Result<$name, $crate::graph::Error> {
+                    Ok($name {
+                        $(
+                            $field: self.$field.ok_or_else(|| $crate::graph::Error::MissingRequiredParameter(String::from(stringify!($field))))?,
+                        )*
+                        id: self.id.unwrap_or_else(Uuid::new_v4),
+                        source: self.source.ok_or_else(|| $crate::graph::Error::MissingRequiredParameter(String::from("source")))?,
+                        target: self.target.ok_or_else(|| $crate::graph::Error::MissingRequiredParameter(String::from("target")))?,
+                    })
+                }
+                
+                /// Build the final edge instance, panicking on missing required fields
+                pub fn build_unchecked(self) -> $name {
+                    $name {
+                        $(
+                            $field: self.$field.expect(&format!("Field '{}' is required", stringify!($field))),
+                        )*
+                        id: self.id.unwrap_or_else(Uuid::new_v4),
+                        source: self.source.expect("Field 'source' is required"),
+                        target: self.target.expect("Field 'target' is required"),
+                    }
+                }
+            }
         }
 
         // Compile-time assertion to ensure all required traits are implemented
